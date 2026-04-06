@@ -10,6 +10,12 @@ Install from GitHub:
 npx skills add MangouArt/mangou-ai-motion-comics -a openclaw -y
 ```
 
+If you need Bun CLI execution after the lightweight install, run:
+
+```bash
+node bootstrap-runtime.mjs
+```
+
 Install from a local clone:
 
 ```bash
