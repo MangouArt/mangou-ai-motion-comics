@@ -1,4 +1,3 @@
-<!-- GENERATED FROM skill-src/mangou. DO NOT EDIT HERE. EDIT skill-src/mangou INSTEAD. -->
 # Mangou Installation
 
 ## Install order
@@ -15,6 +14,12 @@
 
 ```bash
 npx skills add MangouArt/mangou-ai-motion-comics -a claude-code -y
+```
+
+如果你在本地开发 `mangou` 主仓库，也可以改用：
+
+```bash
+npx skills add ./skill-src/mangou --agent claude-code
 ```
 
 如果当前 agent 不走 `vercel-labs/skills`，再使用基础 zip：

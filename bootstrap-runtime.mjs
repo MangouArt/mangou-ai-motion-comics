@@ -51,10 +51,14 @@ async function downloadRuntimeArchive(runtimeUrl, archivePath) {
 }
 
 async function extractArchive(archivePath, extractRoot) {
-  try {
-    await execFileAsync("python3", ["-m", "zipfile", "-e", archivePath, extractRoot]);
+  const python3Exists = await pathExists("/run/current-system/sw/bin/python3") || await pathExists("/usr/bin/python3");
+  if (python3Exists) {
+    const python3 = (await pathExists("/run/current-system/sw/bin/python3"))
+      ? "/run/current-system/sw/bin/python3"
+      : "/usr/bin/python3";
+    await execFileAsync(python3, ["-m", "zipfile", "-e", archivePath, extractRoot]);
     return;
-  } catch {}
+  }
 
   try {
     await execFileAsync("unzip", ["-oq", archivePath, "-d", extractRoot]);

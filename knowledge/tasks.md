@@ -1,4 +1,3 @@
-<!-- GENERATED FROM skill-src/mangou. DO NOT EDIT HERE. EDIT skill-src/mangou INSTEAD. -->
 # 任务真相源
 
 ## 何时阅读
