@@ -9,6 +9,13 @@ Mangou AI Motion Comics 现在是对外主产品仓。
 - 安装与 setup 入口
 - Hermes 自进化落点
 
+这里不再承接：
+- dashboard 前端源码
+- vite 构建链
+- dist 静态产物
+
+Dashboard npm 包与前端构建真相源统一留在 `mangou`。
+
 ## 安装
 
 推荐方式：
@@ -43,11 +50,10 @@ node bootstrap-runtime.mjs
 npm install
 npm run typecheck
 npm run test
-npm run build
 ```
 
 ## 关系说明
 
-- `mangou-ai-motion-comics`：最终产品仓
+- `mangou-ai-motion-comics`：最终产品仓（skill / provider / runtime）
 - `mangou`：core / dashboard / spec 仓
 - `Mango`：内部母仓 / workspace / orchestration

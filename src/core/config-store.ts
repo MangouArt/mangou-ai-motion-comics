@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 export interface AppConfig {
   bltai?: {
     apiKey: string;
@@ -11,41 +14,31 @@ const DEFAULT_CONFIG: AppConfig = {
   workspaceDir: 'projects',
 };
 
+function resolveConfigPath() {
+  const envRoot = process.env.MANGOU_HOME || process.cwd();
+  return path.resolve(envRoot, 'config.json');
+}
+
 class ConfigStore {
   private config: AppConfig;
-  private isBrowser: boolean;
 
   constructor() {
-    this.isBrowser = typeof window !== 'undefined';
-    this.config = { ...DEFAULT_CONFIG };
-    if (this.isBrowser) {
-      try {
-        const stored = localStorage.getItem('mangou-config');
-        if (stored) {
-          this.config = { ...DEFAULT_CONFIG, ...JSON.parse(stored) };
-        }
-      } catch (e) {
-        console.warn('Failed to load config from localStorage', e);
-      }
-    } else {
-      try {
-        const req = Function('return typeof require !== "undefined" ? require : null')();
-        if (!req) return;
-        const fs = req('fs');
-        const path = req('path');
-        const envRoot = process.env.MANGOU_HOME || process.cwd();
-        const configPath = path.resolve(envRoot, 'config.json');
+    this.config = this.loadConfig();
+  }
 
-        if (fs.existsSync(configPath)) {
-          const data = fs.readFileSync(configPath, 'utf-8');
-          this.config = { ...DEFAULT_CONFIG, ...JSON.parse(data) };
-        }
-      } catch {
-        // ignore
+  private loadConfig(): AppConfig {
+    try {
+      const configPath = resolveConfigPath();
+      if (!fs.existsSync(configPath)) {
+        return { ...DEFAULT_CONFIG };
       }
+      const data = fs.readFileSync(configPath, 'utf-8');
+      return { ...DEFAULT_CONFIG, ...JSON.parse(data) };
+    } catch {
+      return { ...DEFAULT_CONFIG };
     }
   }
-  
+
   get<K extends keyof AppConfig>(key: K): AppConfig[K] {
     return this.config[key];
   }
@@ -61,20 +54,11 @@ class ConfigStore {
   }
 
   private saveConfig() {
-    if (this.isBrowser) {
-      localStorage.setItem('mangou-config', JSON.stringify(this.config));
-    } else {
-      try {
-        const req = Function('return typeof require !== "undefined" ? require : null')();
-        if (!req) return;
-        const fs = req('fs');
-        const path = req('path');
-        const envRoot = process.env.MANGOU_HOME || process.cwd();
-        const configPath = path.resolve(envRoot, 'config.json');
-        fs.writeFileSync(configPath, JSON.stringify(this.config, null, 2), 'utf-8');
-      } catch {
-        // ignore
-      }
+    try {
+      const configPath = resolveConfigPath();
+      fs.writeFileSync(configPath, JSON.stringify(this.config, null, 2), 'utf-8');
+    } catch {
+      // ignore
     }
   }
 

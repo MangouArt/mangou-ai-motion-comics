@@ -51,7 +51,7 @@ async function uploadToEvolink(apiKey: string, dataUrl: string, fetchImpl = fetc
     body: formData,
   });
 
-  const data = await response.json();
+  const data: any = await response.json();
   if (!response.ok || !data?.success) {
     throw new Error(`EvoLink stream upload failed: ${response.status} ${JSON.stringify(data)}`);
   }

@@ -112,11 +112,11 @@ export async function submitTask(baseUrl: string, apiKey: string, scope: 'images
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
+    const errorData: any = await response.json().catch(() => ({}));
     throw new Error(errorData.error?.message || `HTTP ${response.status}`);
   }
 
-  const data = await response.json();
+  const data: any = await response.json();
   const taskId = data.task_id || data.id || data.data?.task_id || data.data?.id;
   if (!taskId) throw new Error('Missing task_id in API response');
   return taskId;
@@ -141,7 +141,7 @@ export async function pollTask(baseUrl: string, apiKey: string, scope: 'images' 
       continue;
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
     const status = String(data?.status || data?.data?.status || '').toUpperCase();
 
     if (['SUCCESS', 'SUCCEEDED', 'COMPLETED', 'DONE'].includes(status)) return data;

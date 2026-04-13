@@ -254,8 +254,16 @@ export function startHttpServer({ appRoot, dataRoot, port = 3000 }: ServerOption
         });
       }
 
-      // Static SPA
-      return serveStatic(appRoot, req, res, url);
+      if (pathname === '/' || pathname === '') {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(STATUS_HTML);
+        return;
+      }
+
+      return sendJson(res, 404, {
+        success: false,
+        error: 'Not found',
+      });
     });
 
     server.on('error', (err: any) => {
@@ -275,62 +283,36 @@ export function startHttpServer({ appRoot, dataRoot, port = 3000 }: ServerOption
   });
 }
 
-async function serveStatic(appRoot: string, req: http.IncomingMessage, res: http.ServerResponse, url: URL) {
-  const distDir = path.join(appRoot, 'dist');
-  const requestedPath = decodeURIComponent(url.pathname);
-  const targetPath = path.join(distDir, requestedPath === '/' ? 'index.html' : requestedPath);
-  try {
-    const stats = await fs.stat(targetPath);
-    if (stats.isFile()) {
-      res.writeHead(200, { 'Content-Type': getStaticContentType(targetPath) });
-      fsSync.createReadStream(targetPath).pipe(res);
-      return;
-    }
-  } catch {}
-  try {
-    const content = await fs.readFile(path.join(distDir, 'index.html'));
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(content);
-  } catch { 
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(FALLBACK_HTML); 
-  }
-}
-
-const FALLBACK_HTML = `
+const STATUS_HTML = `
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mangou AI Studio - Server Status</title>
+  <title>Mangou Motion Comics Runtime</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body { background: #09090b; color: #fafafa; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 1rem; box-sizing: border-box; }
-    .card { background: #18181b; border: 1px solid #27272a; padding: 2.5rem; border-radius: 0.75rem; text-align: center; max-width: 480px; width: 100%; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
-    h1 { color: #f4f4f5; margin-bottom: 1.5rem; font-size: 1.5rem; letter-spacing: -0.025em; }
-    p { color: #a1a1aa; line-height: 1.6; margin: 1rem 0; font-size: 0.95rem; }
+    .card { background: #18181b; border: 1px solid #27272a; padding: 2.5rem; border-radius: 0.75rem; text-align: left; max-width: 560px; width: 100%; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4); }
+    h1 { color: #f4f4f5; margin-bottom: 1rem; font-size: 1.5rem; letter-spacing: -0.025em; }
+    p, li { color: #a1a1aa; line-height: 1.6; font-size: 0.95rem; }
     code { background: #27272a; padding: 0.2rem 0.45rem; border-radius: 0.375rem; color: #e4e4e7; font-family: monospace; font-size: 0.9em; }
-    .status { display: inline-flex; align-items: center; background: rgba(34, 197, 94, 0.1); color: #4ade80; padding: 0.35rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 500; margin-bottom: 1.5rem; }
+    .status { display: inline-flex; align-items: center; background: rgba(34, 197, 94, 0.1); color: #4ade80; padding: 0.35rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 500; margin-bottom: 1.25rem; }
     .dot { width: 8px; height: 8px; background: currentColor; border-radius: 50%; margin-right: 0.5rem; }
-    hr { border: 0; border-top: 1px solid #27272a; margin: 2rem 0; }
     a { color: #3b82f6; text-decoration: none; }
     a:hover { text-decoration: underline; }
+    ul { padding-left: 1.25rem; }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="status"><span class="dot"></span>Server Active</div>
-    <h1>Mangou CLI Server</h1>
-    <p>Readonly mirror server is running, but the frontend was not detected in <code>dist/</code>.</p>
-    <p>Run <code>bun run build</code> in the source directory to enable the full visual dashboard.</p>
-    <hr>
-    <p style="font-size: 0.85rem;">API is live at <a href="/api/projects"><code>/api/projects</code></a></p>
+    <div class="status"><span class="dot"></span>Runtime Active</div>
+    <h1>Mangou Motion Comics Runtime</h1>
+    <p>这个仓库现在只承接 skill、provider、CLI 和只读镜像 API，不再内置 dashboard 前端构建产物。</p>
+    <ul>
+      <li>项目 API：<a href="/api/projects"><code>/api/projects</code></a></li>
+      <li>运行入口：<code>bun run mangou -- server start</code></li>
+      <li>Dashboard 真相源：<code>mangou</code> 仓中的独立 dashboard 包</li>
+    </ul>
   </div>
 </body>
 </html>
 `;
-
-function getStaticContentType(filePath: string) {
-  const ext = path.extname(filePath).toLowerCase();
-  const types: any = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.png': 'image/png' };
-  return types[ext] || 'application/octet-stream';
-}
