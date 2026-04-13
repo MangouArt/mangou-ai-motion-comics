@@ -27,4 +27,4 @@ bun run src/main.ts server start --port 3000
 1. 先改 YAML，再执行命令。
 2. provider 行为异常时，同时检查：文档、provider adapter、测试。
 3. 真实项目目录只认 `<workspace>/projects/`。
-4. 不再依赖 `mangou-runtime.zip` 手工合并模型。
+4. 安装与升级只走 `npx skills add MangouArt/mangou-ai-motion-comics` 主流程，不再使用任何 zip 包分发。

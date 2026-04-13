@@ -36,7 +36,7 @@ npm run test
 - Core 仓：`mangou`
 - 内部母仓：`Mango`
 
-不要再使用以下旧主路径：
-- `mangou.zip`
-- `mangou-runtime.zip`
-- `mangou/skill-src/mangou`
+当前只保留这一条安装路径：
+- `npx skills add MangouArt/mangou-ai-motion-comics`
+
+不要再使用任何 zip 包分发或 `mangou/skill-src/mangou` 旧链路。

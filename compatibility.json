@@ -4,10 +4,8 @@
   "workspaceProjectRoot": "Mango/workspace/projects",
   "installation": {
     "primary": "npx skills add MangouArt/mangou-ai-motion-comics",
-    "legacy": [
-      "mangou.zip",
-      "mangou-runtime.zip"
-    ]
+    "zipDistribution": false,
+    "skillSrcDistribution": false
   },
   "migrationStatus": "local-phase-1"
 }
