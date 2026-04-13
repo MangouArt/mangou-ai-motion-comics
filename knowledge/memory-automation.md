@@ -11,7 +11,7 @@
 ## 提取步骤
 1. **回顾对话**：从最近的对话中提取成功的 Prompt 片段。
 2. **对比分析**：找出导致失败的原因和修正后的关键点。
-3. **格式化**：按照 `skill-src/mangou/memories/TEMPLATE.md` 生成 Markdown。
+3. **格式化**：按照 `mangou-ai-motion-comics/memories/TEMPLATE.md` 生成 Markdown。
 4. **命名规范**：使用 `YYYY-MM-DD-描述性关键词.md` 命名。
 
 ## 写入位置

@@ -1,0 +1,13 @@
+{
+  "productRepo": "mangou-ai-motion-comics",
+  "coreRepo": "mangou",
+  "workspaceProjectRoot": "Mango/workspace/projects",
+  "installation": {
+    "primary": "npx skills add MangouArt/mangou-ai-motion-comics",
+    "legacy": [
+      "mangou.zip",
+      "mangou-runtime.zip"
+    ]
+  },
+  "migrationStatus": "local-phase-1"
+}

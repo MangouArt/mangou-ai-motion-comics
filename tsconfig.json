@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["bun", "node"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@core/*": ["./src/core/*"],
+      "@logic/*": ["./src/logic/*"],
+      "@server/*": ["./src/server/*"],
+      "@web/*": ["./src/web/*"],
+      "@components/*": ["./src/web/components/*"]
+    }
+  },
+  "include": ["src", "test", "vite.config.ts", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist"]
+}
