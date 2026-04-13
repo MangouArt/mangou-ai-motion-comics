@@ -1,22 +1,56 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { main } from "../../src/main";
+import { resolveProjectRoot } from "../../src/commands/project";
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import yaml from "js-yaml";
 
 describe("mangou-cli commands", () => {
   const projectName = "test-cli-project";
+  const envProjectName = "env-cli-project";
   const projectRoot = path.join(process.cwd(), "projects", projectName);
+  const envProjectRootInCwd = path.join(process.cwd(), "projects", envProjectName);
   const originalArgv = [...process.argv];
+  const originalMangouHome = process.env.MANGOU_HOME;
+  const originalWorkspaceRoot = process.env.MANGOU_WORKSPACE_ROOT;
+  let tempRoot = "";
 
   beforeEach(async () => {
     process.argv = [...originalArgv];
+    if (originalMangouHome === undefined) {
+      delete process.env.MANGOU_HOME;
+    } else {
+      process.env.MANGOU_HOME = originalMangouHome;
+    }
+    if (originalWorkspaceRoot === undefined) {
+      delete process.env.MANGOU_WORKSPACE_ROOT;
+    } else {
+      process.env.MANGOU_WORKSPACE_ROOT = originalWorkspaceRoot;
+    }
+    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "mangou-cli-test-"));
     await fs.rm(projectRoot, { recursive: true, force: true }).catch(() => {});
+    await fs.rm(envProjectRootInCwd, { recursive: true, force: true }).catch(() => {});
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     process.argv = [...originalArgv];
+    if (originalMangouHome === undefined) {
+      delete process.env.MANGOU_HOME;
+    } else {
+      process.env.MANGOU_HOME = originalMangouHome;
+    }
+    if (originalWorkspaceRoot === undefined) {
+      delete process.env.MANGOU_WORKSPACE_ROOT;
+    } else {
+      process.env.MANGOU_WORKSPACE_ROOT = originalWorkspaceRoot;
+    }
     vi.restoreAllMocks();
+    if (tempRoot) {
+      await fs.rm(tempRoot, { recursive: true, force: true }).catch(() => {});
+    }
+    await fs.rm(projectRoot, { recursive: true, force: true }).catch(() => {});
+    await fs.rm(envProjectRootInCwd, { recursive: true, force: true }).catch(() => {});
   });
 
   it("project init: creates physical directory structure", async () => {
@@ -33,6 +67,37 @@ describe("mangou-cli commands", () => {
     const projectJson = await fs.readFile(path.join(projectRoot, "project.json"), "utf-8");
     const meta = JSON.parse(projectJson);
     expect(meta.id).toBe(projectName);
+  });
+
+  it("project init: respects MANGOU_WORKSPACE_ROOT when provided", async () => {
+    const envProjectsRoot = path.join(tempRoot, "projects");
+    const envProjectRoot = path.join(envProjectsRoot, envProjectName);
+
+    process.env.MANGOU_HOME = tempRoot;
+    process.env.MANGOU_WORKSPACE_ROOT = envProjectsRoot;
+    process.argv = ["node", "mangou", "project", "init", "--name", envProjectName];
+
+    await main();
+
+    const existsInEnvRoot = await fs.access(envProjectRoot).then(() => true).catch(() => false);
+    const existsInCwdRoot = await fs.access(path.join(process.cwd(), "projects", envProjectName)).then(() => true).catch(() => false);
+
+    expect(existsInEnvRoot).toBe(true);
+    expect(existsInCwdRoot).toBe(false);
+
+    const projectJson = await fs.readFile(path.join(envProjectRoot, "project.json"), "utf-8");
+    const meta = JSON.parse(projectJson);
+    expect(meta.id).toBe(envProjectName);
+  });
+
+  it("resolveProjectRoot: shares env-aware resolution used by init and stitch", () => {
+    const envProjectsRoot = path.join(tempRoot, "projects");
+    process.env.MANGOU_HOME = tempRoot;
+    process.env.MANGOU_WORKSPACE_ROOT = envProjectsRoot;
+
+    expect(resolveProjectRoot("shared-env-project")).toBe(
+      path.join(envProjectsRoot, "shared-env-project"),
+    );
   });
 
   it("project stitch: triggers ffmpeg concatenation logic", async () => {

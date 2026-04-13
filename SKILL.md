@@ -41,6 +41,8 @@ Mangou checklist
 - [ ] 先确认本技能已通过 npx skills 安装
 - [ ] 需要本地运行 CLI 前，先执行 node bootstrap-runtime.mjs
 - [ ] 真实项目目录只认 <workspace>/projects/
+- [ ] 通过 workspace/.agents/skills/mangou-ai-motion-comics 挂载本仓时，优先在 Mango/workspace 作为 pwd 执行 CLI
+- [ ] `project init` / `project stitch` 现在会优先尊重 `MANGOU_WORKSPACE_ROOT`（其次 `MANGOU_HOME + config.workspaceDir`，最后退回 `process.cwd()/projects`）
 - [ ] 先读项目目录规范，再改 YAML
 - [ ] 生成后只信任 tasks.jsonl 和 YAML latest 回填
 - [ ] 若 provider 行为不符合文档，直接在本仓同步修文档、代码与测试
