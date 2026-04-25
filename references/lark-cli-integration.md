@@ -2,7 +2,7 @@
 
 ## 何时阅读
 
-- Hermes 通过飞书群或私聊接收 Mangou 任务
+- 当前运行环境选择使用 Lark/飞书作为协作入口
 - 需要把飞书文档、图片、视频或文件转成项目输入
 - 需要把生成结果回传到飞书文档或群消息
 - 需要排查飞书权限、文档分享或附件下载问题
@@ -17,17 +17,17 @@
 ## 推荐流程
 
 1. 从飞书消息或文档提取需求、参考素材和项目 ID。
-2. 确认 `MANGOU_WORKSPACE_ROOT` 指向 projects root，例如 `/opt/data/workspace/projects`；如果 Hermes tool 环境读不到该变量，但当前在 Zeabur `/opt/data` 持久卷中运行，使用 `/opt/data/workspace/projects` 作为显式 fallback。
+2. 确认 `MANGOU_WORKSPACE_ROOT` 指向当前 runtime 的 projects root；如果环境变量不可用，先让用户或部署配置指定显式路径。
 3. 如果项目不存在，执行 `./scripts/project/init.sh --name <project-id>`。
 4. 把需求整理为 `asset_defs/*.yaml` 或 `storyboards/*.yaml`，所有路径都相对项目根目录。
 5. 调用 `./scripts/asset/generate.sh`、`./scripts/workflow/storyboard-generate.sh`、`./scripts/workflow/storyboard-split.sh` 或 `./scripts/project/stitch.sh`。
 6. 读取 `tasks.jsonl` 和 YAML `latest` 字段确认结果。
 7. 用 lark-cli 把摘要、产物路径、下载链接或文档更新回传给用户。
 
-## 容器环境
+## 运行环境
 
-- Hermes 容器内不要使用本地开发机路径，例如 `/home/jachinshen/Sync/Mango/workspace`。
-- 线上持久项目目录应使用 `/opt/data/workspace/projects`。
+- 不要使用只在开发机存在的绝对路径。
+- 线上或容器化部署应使用部署平台提供的持久化 projects root。
 - skill 根目录、lark-cli 配置目录和项目目录是不同概念；不要把任何一个复制成另一个。
 
 ## 权限排查

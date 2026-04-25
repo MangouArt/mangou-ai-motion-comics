@@ -37,20 +37,21 @@
 
 ```yaml
 meta:
-  id: "hero-lee"
+  id: "asset-001"
   type: "character"
   version: "1.0"
 content:
-  name: "李英雄"
-  name_en: "Hero Lee"
-  appearance: "黑色短发，穿着银色轻型动力装甲，眼神坚定。"
+  name: "资产名称"
+  name_en: "Asset Name"
+  description: "保留用户提供的资产设定。"
+  appearance: "描述需要稳定复用的外观特征。"
 tasks:
   image:
-    provider: "bltai"
+    provider: "<configured-image-provider>"
     params:
-      model: "nano-banana-2"
-      prompt: "Character concept art, a brave warrior in silver armor, white background."
+      model: "<provider-model>"
+      prompt: "Asset reference image prompt based on current project requirements."
     latest:
       status: "completed"
-      output: "assets/images/hero-lee-ref.png"
+      output: "assets/images/asset-001-ref.png"
 ```

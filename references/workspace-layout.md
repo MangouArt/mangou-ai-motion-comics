@@ -9,48 +9,42 @@
 ## 结构
 
 ```text
-<workspace_root>/
-  <skill-root>/
-  config.json
-  projects.json
-  projects/
-    <project_id>/
-      project.json
-      tasks.jsonl
-      storyboards/
-      asset_defs/
-      assets/
-      output/
+<projects-root>/
+  <project_id>/
+    project.json
+    tasks.jsonl
+    storyboards/
+    asset_defs/
+    assets/
+    output/
 ```
 
 ## 目录职责
 
-- `<skill-root>/`: Mangou skill 根目录。不同 agent 会把它安装到不同位置，不要写死 `.claude`、`.agents` 或其他平台专属路径。
-- `config.json`: 全局 provider 配置
-- `projects/<project_id>/storyboards/`: 分镜 YAML
-- `projects/<project_id>/asset_defs/`: 资产 YAML
-- `projects/<project_id>/assets/`: 图片和视频产物
-- `projects/<project_id>/tasks.jsonl`: 任务真相源
-- `projects/<project_id>/output/`: 全片导出
+- `<skill-root>/`: Mangou skill 根目录。不同 agent 会把它安装到不同位置，不要写死平台专属路径。
+- `<projects-root>/<project_id>/storyboards/`: 分镜 YAML
+- `<projects-root>/<project_id>/asset_defs/`: 资产 YAML
+- `<projects-root>/<project_id>/assets/`: 图片和视频产物
+- `<projects-root>/<project_id>/tasks.jsonl`: 任务真相源
+- `<projects-root>/<project_id>/output/`: 全片导出
 
 ## 路径规则
 
 1. 所有 YAML 和命令参数都用相对于项目根目录的路径。
 2. 不要跨项目引用别的 `assets/`。
 3. 不要手动删除 `tasks.jsonl`。
-4. skill 根目录与项目工作区是两个不同层级，不要把 `projects/` 放进 skill 根目录。
+4. skill 根目录与项目工作区是两个不同层级，不要把真实项目放进 skill 根目录。
 5. 先通过当前 agent 的技能机制定位实际 `<skill-root>`，再执行 Python runtime helper scripts。
 
 ## 运行时根目录
 
 - `MANGOU_WORKSPACE_ROOT` 当前表示 **projects root**，不是 workspace parent。
-- 本地母仓通常设置或推断为 `Mango/workspace/projects`。
-- 容器化 Hermes / Feishu 环境没有本地路径 `/home/jachinshen/Sync/Mango/workspace`，应使用持久卷内路径 `/opt/data/workspace/projects`。
-- 如果 Zeabur 服务级环境变量存在，但 Hermes 的 tool shell 或 `execute_code` 读不到它，应显式使用 `/opt/data/workspace/projects` 作为 fallback；不要退回 `/opt/data` 或当前工作目录。
+- 本地开发、服务器、容器或其它 agent runtime 都应显式配置自己的 projects root。
+- 如果环境变量不存在，先让用户或当前 runtime 指定 projects root；不要退回到 skill 根目录。
 - 执行 `project init` 后必须先确认实际落点，再继续写入资产定义或 storyboard。
 
-## 飞书协作边界
+## 协作工具边界
 
-- 飞书文档、群消息和附件只作为协作输入/输出通道。
-- 项目真相源仍是 `<workspace>/projects/<project_id>/` 下的 `project.json`、YAML、`tasks.jsonl` 和产物文件。
-- 从飞书收到的需求或素材应先落到正确项目目录，再调用 Mangou CLI；不要把飞书文档当作项目目录或任务真相源。
+- 飞书、Slack、Discord、邮件或其它协作工具只作为输入/输出通道。
+- 项目真相源仍是 `<projects-root>/<project_id>/` 下的 `project.json`、YAML、`tasks.jsonl` 和产物文件。
+- 从协作工具收到的需求或素材应先落到正确项目目录，再调用 Mangou CLI；不要把聊天或文档当作项目目录或任务真相源。

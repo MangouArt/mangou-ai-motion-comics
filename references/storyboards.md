@@ -37,7 +37,7 @@
 
 ### `tasks.<type>`
 
-- `provider`: 必填。脚本不会自动推断；图片任务推荐 `bltai`，视频任务推荐 `evolink`
+- `provider`: 必填。脚本不会自动推断；按当前环境、用户要求和 provider 文档选择。
 - `params.model`
 - `params.prompt`
 - `params.images`
@@ -58,23 +58,23 @@
 
 ```yaml
 meta:
-  id: "s1"
+  id: "shot-001"
   version: "1.0"
 content:
   sequence: 1
-  title: "初见"
-  story: "在繁忙的车站，两人擦肩而过。"
-  action: "特写镜头，微风吹动发丝，眼神交错。"
-  scene: "火车站站台，夕阳余晖。"
+  title: "镜头标题"
+  story: "保留用户提供的原始剧情或需求。"
+  action: "描述当前镜头中可执行的主体动作。"
+  scene: "描述当前镜头所在的场景和空间关系。"
   duration: "4s"
 tasks:
   image:
-    provider: "bltai"
+    provider: "<configured-image-provider>"
     params:
-      model: "nano-banana-2"
-      prompt: "Cinematic close shot, a girl looking back at a boy on a train platform during sunset."
+      model: "<provider-model>"
+      prompt: "Subject, action, scene, composition, and project-specific constraints."
       aspect_ratio: "16:9"
     latest:
       status: "completed"
-      output: "assets/images/s1-8821a.png"
+      output: "assets/images/shot-001.png"
 ```

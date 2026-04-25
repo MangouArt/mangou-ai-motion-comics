@@ -62,7 +62,7 @@ python3 -m unittest discover -s tests_python -p 'test_*.py' -v
 
 ## 工作区规则
 
-- 真实项目目录只认 `<workspace>/projects/`
+- 真实项目目录只认当前运行环境声明的 projects root，例如 `$MANGOU_WORKSPACE_ROOT/<project-id>/`
 - 不要把 skill 根目录当成项目目录
 - `tests_python/` 只放 Python `unittest` 测试，不是真实工作区
-- 如果通过 Hermes/飞书使用本 skill，容器内 `MANGOU_WORKSPACE_ROOT` 应指向 projects root，例如 `/opt/data/workspace/projects`
+- `MANGOU_WORKSPACE_ROOT` 表示 projects root，不是 workspace parent

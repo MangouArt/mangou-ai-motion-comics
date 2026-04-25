@@ -1,94 +1,82 @@
-# Prompt 规则
+# Prompt 框架
 
-## Contents
+## 何时阅读
 
-- 结构化图片 prompt
-- 资产三视图
-- Grid 防污染
-- 3x3 母图后缀
-- I2V 视频 prompt
+- 要把用户需求转换为图片或视频生成 prompt
+- 要让 prompt 与项目 YAML、资产引用和 provider 参数保持一致
+- 要排查生成结果偏离当前项目约束
 
-## 结构化图片 prompt
+## 核心原则
 
-图片任务的 `prompt` 优先按这个顺序写：
+1. Prompt 应服务当前项目，不携带 skill 内置审美偏好。
+2. 风格、镜头、材质、题材和负向约束必须来自用户需求、项目 YAML、参考素材或会话上下文。
+3. Prompt 只写可执行约束，不把临时经验沉淀成全局默认。
+4. 连续性优先依赖引用图、资产基准图和上一镜产物；文字 prompt 只补充必要变化。
 
-- 主体：谁，处于什么状态
-- 环境：场景、光线、氛围
-- 动作：走位、视角、交互
-- 风格：媒介、质感、负向约束
+## 图片 Prompt 结构
 
-连续镜头优先复用上一镜图片，不要全靠文字维持一致性。
+按需组织以下信息：
 
-## 资产三视图
+- 主体：角色、物体或场景核心对象
+- 状态：姿态、表情、动作或变化
+- 环境：地点、时间、光线、空间关系
+- 构图：镜头距离、视角、画幅、主体位置
+- 风格：仅使用当前项目明确要求的风格
+- 约束：需要避免的文字、水印、错位、结构错误等
 
-核心角色和关键道具，优先先做三视图：
-
-- front
-- side
-- back
-
-作用是锁定视觉锚点。后续母图或分镜要在 `params.images` 中引用它们。
-
-## Grid 防污染
-
-生成宫格母图时：
-
-1. 不要用 `1. ... 2. ...` 这类数字列表描述每格内容。
-2. 改用方位词：`top-left`、`top-right`、`center`、`bottom-left`、`bottom-right`。
-3. 若模型爱生数字，补 `no numeric labels, no digits, no numbers`。
-
-## 3x3 母图后缀
-
-`meta.grid: 3x3` 且目标是后续物理切分时，追加以下固定约束：
+示例模板：
 
 ```text
-A professional 3x3 SEAMLESS storyboard grid. NO WHITE BORDERS, NO MARGINS, NO GAPS, NO CAPTIONS, NO TEXT. The 9 panels are tightly tiled together.
+Subject: <who or what>
+State: <pose/action/change>
+Environment: <where, lighting, atmosphere>
+Composition: <shot size, angle, framing>
+Style constraints: <project-specific style only>
+Negative constraints: <known failure modes only>
 ```
 
-## 3x3 宫格比例锁定 (Rigid 3x3 Enforcement)
+## 视频 Prompt 结构
 
-在 `meta.grid: 3x3` 场景下，若模型出现布局混乱（如生成漫画分镜而非均匀宫格），需强化以下指令：
+视频 prompt 应优先说明变化过程：
 
-1. **几何对称（Geometric Symmetry）**:
-   - 使用 `A MATHEMATICALLY UNIFORM 3x3 STORYBOARD GRID`。
-   - 增加 `9 IDENTICAL RECTANGULAR PANELS` 或 `9 EQUAL SIZED RECTANGLES IN A 3x3 ARRAY`。
-2. **边框净化（Border Protocol）**:
-   - **避免**使用 `THICK BLACK LINES`（可能导致模型过度夸张边框厚度或触发漫画排版逻辑）。
-   - **优先**使用 `CLEAN BLACK HORIZONTAL AND VERTICAL LINES` 或 `THIN BLACK DIVIDER LINES`。
-3. **结构隔离**:
-   - `STRUCTURE: 9 identical cells separated by CLEAN lines. NO BLEEDING between cells.`
+- 起始状态
+- 结束状态
+- 摄影机运动
+- 主体运动
+- 不应变化的身份、空间或构图约束
+- 时间分段（仅在动作复杂时使用）
 
-## 视觉 DNA 约束
+示例模板：
 
-- **核心锚点定义**：Prompt 必须显式声明基准色温（K）、曝光模式（Key）及主导光源性质，以锁定视觉 DNA 基调。
-- **工业纪实策略**：若采用写实风格，建议使用具象物理材质描述（如磨砂、拉丝、氧化层），强调结构的功能性。
-- **材质化语义**：使用具象物理材质代替虚泛形容词。重点描述光线在特定材质表面的交互效果。
-- **负向净化**：系统排除低保真、非线性光影、过度风格化等干扰元素。
+```text
+Start: <initial visual state>
+Motion: <camera and subject movement>
+End: <final visual state>
+Continuity: keep <identity/position/style constraints>
+Avoid: <project-specific failure modes>
+```
 
-## 高保真复刻 (Cinematic Reproduction)
-针对电影/高精密影视片段的复刻，必须覆盖以下硬约束：
+## 资产引用
 
-1. **反 AI 审美（Anti-AI Aesthetic）**：
-    - 使用 `Gritty Analog 35mm film scan`, `Rough industrial textures`, `Hard single-source lighting (High contrast)`。
-    - 强制追加 `Heavy film grain`, `Unpolished metallic surfaces` 以对抗 AI 原生的过于平滑的质感。
-3. **画风纠偏（Stylistic Drift Control）**:
-    - **硬约束（Negative Style Guards）**: 显式添加 `NOT ANIME, NOT COMIC BOOK, NOT SKETCH, NO LINE ART`。
-    - **真人化指令**: 增加 `PHOTOREALISTIC, LIVE ACTION, CINEMATIC FILM SCAN`。
-    - **物理化转译**: 避免使用可能触发动漫特效的词汇（如 `magnetic light`, `energy glow`），改用物理材质反射（如 `metallic surface reflection`, `diffuse metal sheen`）。
-4. **机械 DNA 锁定（Mechanical DNA Enforcement）**:
-   - 严禁使用宽泛的机械描述（如 "complex gears"）。
-   - 建议定义具体的、在该项目中具有唯一性的工业组件名称并全局复用（例：`特定型号的压力泵组件`），以锁定跨镜头的机械设计语义。
+1. 角色、场景、道具需要稳定复用时，先生成资产基准图。
+2. 后续分镜通过 `params.images`、`image_urls` 或 provider 对应媒体字段引用资产。
+3. 是否需要正面、侧面、背面等多视图，由当前项目复杂度决定，不作为默认要求。
 
-## I2V 视频 prompt
+## Grid Prompt
 
-I2V prompt 重点不是“好看”，而是把物理约束写死：
+使用 grid 母图时：
 
-1. 写清镜头怎么动，别写空泛审美词。
-2. 明确变化来源只能是摄影机运动、视差、遮挡、视角变化。
-3. 显式禁止：
-   - `no fade in`
-   - `no fade out`
-   - `no morphing`
-   - `no dissolve`
-   - `no spatial re-layout`
-4. 必要时用分段时间轴覆盖完整动作。
+1. grid 尺寸以 `meta.grid` 为真相源。
+2. prompt 可以说明每格内容，但不要让 prompt 成为 grid 尺寸的唯一依据。
+3. 如果要后续切分，明确要求无字幕、无水印、无额外边框或其它当前项目不需要的装饰。
+4. 如果模型把 grid 生成成普通漫画页，再临时追加更强的几何约束；这些约束只用于当前任务排障。
+
+## 失败排查
+
+结果偏离预期时，按顺序检查：
+
+1. 当前 YAML 是否表达了真实需求。
+2. 是否缺少必要参考图或上一镜产物。
+3. provider 字段是否符合对应 `provider-*.md`。
+4. prompt 是否混入了与当前项目无关的风格或负向约束。
+5. 是否需要把稳定约束写入项目 YAML，而不是只写在一次性 prompt 中。
