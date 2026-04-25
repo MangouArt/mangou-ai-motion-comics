@@ -47,6 +47,7 @@ Mangou checklist
 - [ ] 开发和测试统一从母仓根目录执行 `nix develop`
 - [ ] 真实项目目录只认 <workspace>/projects/
 - [ ] 通过 workspace/.agents/skills/mangou-ai-motion-comics 挂载本仓时，优先在 Mango/workspace 作为 pwd 执行 helper scripts
+- [ ] `MANGOU_WORKSPACE_ROOT` 表示 **projects root**，不是 workspace parent；例如容器内应设为 `/opt/data/workspace/projects`
 - [ ] `project init` / `project stitch` 现在会优先尊重 `MANGOU_WORKSPACE_ROOT`（其次 `MANGOU_HOME + config.workspaceDir`，最后退回 `process.cwd()/projects`）
 - [ ] 执行 `storyboard generate` / `asset generate` / `storyboard split` 时，优先在包含 `project.json` 的项目根目录作为 cwd，`--path` 使用相对项目根路径
 - [ ] 先读 `references/workspace-layout.md`，再改 YAML
@@ -58,7 +59,7 @@ Mangou checklist
 
 1. 本仓是 skill、references、helper scripts、provider、CLI/runtime 的统一真相源。
 2. 所有 provider 产品层修改都应在本仓完成，不回写旧的 `mangou/skill-src`。
-3. 真实项目目录只保留在母仓工作区：`Mango/workspace/projects/`。
+3. 真实项目目录只保留在母仓工作区：`Mango/workspace/projects/`；在容器化 Hermes 环境中使用等价持久路径 `/opt/data/workspace/projects/`。
 4. 生成失败时先检查 YAML 参数、provider 错误、`tasks.jsonl` 与对应测试。
 5. 调优成功后，优先把规则沉淀到本仓的 `references/`，把经验沉淀到工作区记忆。
 
