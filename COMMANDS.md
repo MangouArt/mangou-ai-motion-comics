@@ -39,3 +39,4 @@ python3 -m unittest discover -s tests_python -p 'test_*.py' -v
 4. 安装与升级只走 `npx skills add MangouArt/mangou-ai-motion-comics` 主流程，不再使用任何 zip 包分发。
 5. `project init`、`project stitch`、`storyboard split`、`runtime api` 均走 Python 主链。
 6. `storyboard generate`、`asset generate` 也走 Python provider 主链；默认开发验证不依赖旧 TS 测试链。
+7. 飞书文档、群消息和附件协作走 `lark-cli`；项目文件、任务日志和生成产物仍以 `<workspace>/projects/<project-id>/` 为真相源。

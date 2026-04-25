@@ -173,11 +173,11 @@ STATUS_HTML = """<!DOCTYPE html>
   <div class="card">
     <div class="status"><span class="dot"></span>Runtime Active</div>
     <h1>Mangou Motion Comics Runtime</h1>
-    <p>这个仓库现在只承接 skill、provider、CLI 和 Python runtime API，不再内置 dashboard 前端构建产物。</p>
+    <p>这个仓库承接 skill、provider、CLI 和 Python runtime API。项目数据以 workspace projects 目录为真相源。</p>
     <ul>
       <li>项目 API：<a href="/api/projects"><code>/api/projects</code></a></li>
       <li>运行入口：<code>./scripts/runtime/api-start.sh</code></li>
-      <li>Dashboard 真相源：<code>mangou</code> 仓中的独立 dashboard 包</li>
+      <li>数据目录：<code>MANGOU_WORKSPACE_ROOT</code> 指向 projects root</li>
     </ul>
   </div>
 </body>

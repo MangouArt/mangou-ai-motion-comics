@@ -11,6 +11,7 @@ required_paths=(
   "scripts/runtime/api-start.sh"
   "scripts/workflow/storyboard-generate.sh"
   "references/workspace-layout.md"
+  "references/lark-cli-integration.md"
   "references/asset-generation.md"
   "workspace_template/config.json"
 )

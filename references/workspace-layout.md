@@ -47,3 +47,9 @@
 - 本地母仓通常设置或推断为 `Mango/workspace/projects`。
 - 容器化 Hermes / Feishu 环境没有本地路径 `/home/jachinshen/Sync/Mango/workspace`，应使用持久卷内路径 `/opt/data/workspace/projects`。
 - 执行 `project init` 后必须先确认实际落点，再继续写入资产定义或 storyboard。
+
+## 飞书协作边界
+
+- 飞书文档、群消息和附件只作为协作输入/输出通道。
+- 项目真相源仍是 `<workspace>/projects/<project_id>/` 下的 `project.json`、YAML、`tasks.jsonl` 和产物文件。
+- 从飞书收到的需求或素材应先落到正确项目目录，再调用 Mangou CLI；不要把飞书文档当作项目目录或任务真相源。

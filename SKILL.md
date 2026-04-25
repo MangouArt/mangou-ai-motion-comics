@@ -53,6 +53,7 @@ Mangou checklist
 - [ ] 执行 `storyboard generate` / `asset generate` / `storyboard split` 时，优先在包含 `project.json` 的项目根目录作为 cwd，`--path` 使用相对项目根路径
 - [ ] 先读 `references/workspace-layout.md`，再改 YAML
 - [ ] 生成后只信任 tasks.jsonl 和 YAML latest 回填
+- [ ] 飞书协作先读 `references/lark-cli-integration.md`；lark-cli 只负责文档、群消息和素材收发，不负责改写项目真相源
 - [ ] 若 provider 行为不符合文档，直接在本仓同步修 `references/`、代码与测试
 ```
 
@@ -62,7 +63,7 @@ Mangou checklist
 2. 所有 provider 产品层修改都应在本仓完成，不回写旧的 `mangou/skill-src`。
 3. 真实项目目录只保留在母仓工作区：`Mango/workspace/projects/`；在容器化 Hermes 环境中使用等价持久路径 `/opt/data/workspace/projects/`。
 4. 生成失败时先检查 YAML 参数、provider 错误、`tasks.jsonl` 与对应测试。
-5. 调优成功后，优先把规则沉淀到本仓的 `references/`，把经验沉淀到工作区记忆。
+5. 调优成功后，优先把稳定规则沉淀到本仓的 `references/`、测试或模板；不要写入独立经验库目录。
 
 ## Skill structure
 
@@ -79,7 +80,7 @@ Mangou checklist
 1. 项目管理：先读 [references/workspace-layout.md](references/workspace-layout.md)，再使用 `scripts/project/*.sh` 初始化或拼接项目。
 2. 素材生成：先读 [references/asset-generation.md](references/asset-generation.md)、[references/storyboards.md](references/storyboards.md)，再调用 `scripts/asset/` 或 `scripts/workflow/`。`storyboard generate`、`asset generate`、`storyboard split` 均走 Python 主链。
 3. 任务诊断：先读 [references/yaml-state.md](references/yaml-state.md)，再检查 `tasks.jsonl`、YAML latest 和 provider 错误。
-4. 记忆沉淀：先读 [references/memory-automation.md](references/memory-automation.md)，最终写入工作区 `workspace/.mangou/memories/`。
+4. 飞书协作：先读 [references/lark-cli-integration.md](references/lark-cli-integration.md)，再使用 lark-cli 进行文档、群消息或附件协作。
 
 ## Reference map
 
@@ -92,5 +93,5 @@ Mangou checklist
 - Prompt 策略：[references/prompts.md](references/prompts.md)
 - 一致性规则：[references/consistency.md](references/consistency.md)
 - 任务真相源：[references/yaml-state.md](references/yaml-state.md)
+- Lark CLI 协作：[references/lark-cli-integration.md](references/lark-cli-integration.md)
 - Provider：`references/provider-*.md`
-- 工作区记忆：[memories/README.md](memories/README.md)
