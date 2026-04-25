@@ -19,37 +19,47 @@ async function pathExists(targetPath) {
   }
 }
 
-async function runBunInstall() {
-  await execFileAsync("bun", ["install"], {
+async function runCommand(command, args) {
+  return execFileAsync(command, args, {
     cwd: SKILL_ROOT,
-    stdio: "inherit",
+    stdio: "pipe",
   });
 }
 
 async function main() {
-  const runtimeEntry = path.join(SKILL_ROOT, "src", "main.ts");
-  const packageJson = path.join(SKILL_ROOT, "package.json");
+  const runtimeEntry = path.join(SKILL_ROOT, "mangou_skill", "cli.py");
+  const pyprojectToml = path.join(SKILL_ROOT, "pyproject.toml");
 
   if (!(await pathExists(runtimeEntry))) {
-    throw new Error("未找到 src/main.ts；当前仓库不完整，无法完成本地 setup。")
+    throw new Error("未找到 mangou_skill/cli.py；当前仓库不完整，无法完成本地 setup。");
   }
 
-  if (!(await pathExists(packageJson))) {
-    throw new Error("未找到 package.json；当前仓库不完整，无法完成本地 setup。")
+  if (!(await pathExists(pyprojectToml))) {
+    throw new Error("未找到 pyproject.toml；当前仓库不完整，无法完成本地 setup。");
   }
 
-  console.log("Mangou runtime 现已内置在主产品仓中。")
-  console.log(`Skill root: ${SKILL_ROOT}`)
+  console.log("Mangou runtime 现已切到 Python 主链。");
+  console.log(`Skill root: ${SKILL_ROOT}`);
 
-  if (!(await pathExists(path.join(SKILL_ROOT, "node_modules")))) {
-    console.log("node_modules 缺失，开始执行 bun install...")
-    await runBunInstall();
-  } else {
-    console.log("检测到 node_modules，跳过 bun install。")
+  const checks = [
+    ["python3", ["--version"], "Python 3"],
+    ["ffmpeg", ["-version"], "FFmpeg"],
+  ];
+
+  for (const [command, args, label] of checks) {
+    try {
+      const result = await runCommand(command, args);
+      const output = `${result.stdout || ""}${result.stderr || ""}`.trim().split("\n")[0] || "(no output)";
+      console.log(`${label}: ${output}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`${label} 不可用，请先从母仓根目录执行 nix develop。原始错误：${message}`);
+    }
   }
 
-  console.log("Setup 完成。你现在可以运行：")
-  console.log("  bun run src/main.ts project init --name <project-id>")
+  console.log("Setup 完成。你现在可以运行：");
+  console.log("  ./scripts/project/init.sh --name <project-id>");
+  console.log("  ./scripts/workflow/storyboard-generate.sh --path storyboards/<shot>.yaml --type image");
 }
 
 main().catch((error) => {

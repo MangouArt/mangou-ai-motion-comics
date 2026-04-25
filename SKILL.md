@@ -17,10 +17,13 @@ disable-model-invocation: true
 
 # Mangou AI Motion Comics
 
-Mangou AI Motion Comics 现在是唯一对外主产品仓。
+Mangou AI Motion Comics 现在按 skill-first 结构组织，是唯一对外主产品仓。
 
 这里统一承接：
-- skill 文档
+- `SKILL.md`
+- `scripts/`
+- `references/`
+- `mangou_skill/`
 - provider 执行逻辑
 - CLI/runtime
 - 安装与 setup 入口
@@ -40,30 +43,54 @@ Mangou AI Motion Comics 现在是唯一对外主产品仓。
 Mangou checklist
 - [ ] 先确认本技能已通过 npx skills 安装
 - [ ] 需要本地运行 CLI 前，先执行 node bootstrap-runtime.mjs
+- [ ] Python 主入口现在是 `python3 -m mangou_skill.cli`
+- [ ] 开发和测试统一从母仓根目录执行 `nix develop`
 - [ ] 真实项目目录只认 <workspace>/projects/
-- [ ] 通过 workspace/.agents/skills/mangou-ai-motion-comics 挂载本仓时，优先在 Mango/workspace 作为 pwd 执行 CLI
+- [ ] 通过 workspace/.agents/skills/mangou-ai-motion-comics 挂载本仓时，优先在 Mango/workspace 作为 pwd 执行 helper scripts
 - [ ] `project init` / `project stitch` 现在会优先尊重 `MANGOU_WORKSPACE_ROOT`（其次 `MANGOU_HOME + config.workspaceDir`，最后退回 `process.cwd()/projects`）
-- [ ] 执行 `storyboard generate` / `asset generate` / `storyboard split` 时，优先在包含 `project.json` 的项目根目录作为 cwd，`--path` 使用相对项目根路径；若从别处调用，使用绝对路径指向 skill root 的 `src/main.ts`
-- [ ] 先读项目目录规范，再改 YAML
+- [ ] 执行 `storyboard generate` / `asset generate` / `storyboard split` 时，优先在包含 `project.json` 的项目根目录作为 cwd，`--path` 使用相对项目根路径
+- [ ] 先读 `references/workspace-layout.md`，再改 YAML
 - [ ] 生成后只信任 tasks.jsonl 和 YAML latest 回填
-- [ ] 若 provider 行为不符合文档，直接在本仓同步修文档、代码与测试
+- [ ] 若 provider 行为不符合文档，直接在本仓同步修 `references/`、代码与测试
 ```
 
 ## Operating rules
 
-1. 本仓是 skill、provider、CLI/runtime 的统一真相源。
+1. 本仓是 skill、references、helper scripts、provider、CLI/runtime 的统一真相源。
 2. 所有 provider 产品层修改都应在本仓完成，不回写旧的 `mangou/skill-src`。
 3. 真实项目目录只保留在母仓工作区：`Mango/workspace/projects/`。
 4. 生成失败时先检查 YAML 参数、provider 错误、`tasks.jsonl` 与对应测试。
-5. 调优成功后，优先把经验沉淀到本仓的 `knowledge/` / `memories/`。
+5. 调优成功后，优先把规则沉淀到本仓的 `references/`，把经验沉淀到工作区记忆。
+
+## Skill structure
+
+- `SKILL.md`: 触发条件、工作规则、references 导航
+- `scripts/`: 稳定 helper scripts，给人和 agent 直接调用
+- `references/`: 项目管理、YAML、provider、prompt 等长文档
+- `mangou_skill/`: Python runtime 与 CLI
+- `assets/templates/`: 项目、分镜、资产模板
+- `workspace_template/`: 安装后工作区初始化骨架
+- `src/`: 遗留 TS/provider 实现，仅作为迁移期参考
+- `test/`: runtime 与 workflow 测试
+- `tests_python/`: Python 主链测试
+
+## Core workflows
+
+1. 项目管理：先读 [references/workspace-layout.md](references/workspace-layout.md)，再使用 `scripts/project/*.sh` 初始化或拼接项目。
+2. 素材生成：先读 [references/asset-generation.md](references/asset-generation.md)、[references/storyboards.md](references/storyboards.md)，再调用 `scripts/asset/` 或 `scripts/workflow/`。`storyboard generate`、`asset generate`、`storyboard split` 已切到 Python 主链。
+3. 任务诊断：先读 [references/yaml-state.md](references/yaml-state.md)，再检查 `tasks.jsonl`、YAML latest 和 provider 错误。
+4. 记忆沉淀：先读 [references/memory-automation.md](references/memory-automation.md)，最终写入工作区 `workspace/.mangou/memories/`。
 
 ## Reference map
 
 - 安装：[INSTALL.md](INSTALL.md)
 - 命令：[COMMANDS.md](COMMANDS.md)
-- 项目目录：[knowledge/directory.md](knowledge/directory.md)
-- 资产定义：[knowledge/assets.md](knowledge/assets.md)
-- 分镜规范：[knowledge/storyboards.md](knowledge/storyboards.md)
-- Prompt 策略：[knowledge/prompts.md](knowledge/prompts.md)
-- 任务真相源：[knowledge/tasks.md](knowledge/tasks.md)
+- 项目目录：[references/workspace-layout.md](references/workspace-layout.md)
+- 项目管理：[references/project-management.md](references/project-management.md)
+- 资产定义：[references/asset-generation.md](references/asset-generation.md)
+- 分镜规范：[references/storyboards.md](references/storyboards.md)
+- Prompt 策略：[references/prompts.md](references/prompts.md)
+- 一致性规则：[references/consistency.md](references/consistency.md)
+- 任务真相源：[references/yaml-state.md](references/yaml-state.md)
+- Provider：`references/provider-*.md`
 - 工作区记忆：[memories/README.md](memories/README.md)

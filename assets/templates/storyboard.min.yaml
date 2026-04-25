@@ -1,0 +1,16 @@
+meta:
+  id: "shot-001"
+  version: "1.0"
+content:
+  sequence: 1
+  title: "镜头标题"
+  story: "这里写原剧情。"
+  action: "这里写动作和机位。"
+  scene: "这里写场景。"
+  duration: "4s"
+tasks:
+  image:
+    provider: "bltai"
+    params:
+      model: "nano-banana-2"
+      prompt: "Cinematic frame."

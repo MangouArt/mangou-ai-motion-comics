@@ -1,0 +1,12 @@
+[project]
+name = "mangou-ai-motion-comics"
+version = "3.0.0"
+description = "Mangou AI Motion Comics skill runtime"
+requires-python = ">=3.11"
+dependencies = [
+  "PyYAML>=6.0",
+]
+
+[tool.unittest]
+start-directory = "tests_python"
+pattern = "test_*.py"

@@ -4,7 +4,7 @@ import path from 'node:path';
 import { buildProjectSnapshot } from '../../src/core/project-snapshot';
 
 describe('project snapshot', () => {
-  const projectRoot = path.join(process.cwd(), 'projects', 'test-snapshot');
+  const projectRoot = path.join(process.cwd(), 'test/fixtures/projects', 'test-snapshot');
 
   beforeEach(async () => {
     await fs.rm(projectRoot, { recursive: true, force: true }).catch(() => {});

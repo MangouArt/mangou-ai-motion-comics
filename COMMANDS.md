@@ -1,30 +1,41 @@
 # COMMANDS
 
-在本仓完成 setup 后，可使用以下命令：
+在母仓根目录先执行 `nix develop`，再进入本仓使用以下命令：
 
 ```bash
 # 初始化项目
-bun run src/main.ts project init --name <project-id>
+./scripts/project/init.sh --name <project-id>
+
+# 拼接项目输出
+./scripts/project/stitch.sh --id <project-id>
 
 # 生成分镜图片
-bun run src/main.ts storyboard generate --path storyboards/<shot>.yaml --type image
+./scripts/workflow/storyboard-generate.sh --path storyboards/<shot>.yaml --type image
 
 # 生成分镜视频
-bun run src/main.ts storyboard generate --path storyboards/<shot>.yaml --type video
+./scripts/workflow/storyboard-generate.sh --path storyboards/<shot>.yaml --type video
 
 # 切分 grid 分镜图
-bun run src/main.ts storyboard split --path storyboards/<shot>.yaml
+./scripts/workflow/storyboard-split.sh --path storyboards/<shot>.yaml
 
 # 生成资产
-bun run src/main.ts asset generate --path asset_defs/<asset>.yaml
+./scripts/asset/generate.sh --path asset_defs/<asset>.yaml
 
 # 启动本地只读服务
-bun run src/main.ts server start --port 3000
+./scripts/workflow/server-start.sh --port 3000
+
+# 检查 skill 结构
+./scripts/doctor/check-layout.sh
+
+# 运行 Python 测试
+python3 -m unittest discover -s tests_python -p 'test_*.py' -v
 ```
 
 ## 规则
 
-1. 先改 YAML，再执行命令。
-2. provider 行为异常时，同时检查：文档、provider adapter、测试。
+1. 先读 `references/`，再改 YAML，再执行命令。
+2. provider 行为异常时，同时检查：`references/`、provider adapter、测试。
 3. 真实项目目录只认 `<workspace>/projects/`。
 4. 安装与升级只走 `npx skills add MangouArt/mangou-ai-motion-comics` 主流程，不再使用任何 zip 包分发。
+5. `project init`、`project stitch`、`storyboard split`、`server start` 已切到 Python 主链。
+6. `storyboard generate`、`asset generate` 也已切到 Python provider 主链；默认开发验证不再依赖 Bun/npm。

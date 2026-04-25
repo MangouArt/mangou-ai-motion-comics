@@ -6,7 +6,7 @@ import { runAIGC } from "../../src/generate";
 import * as registry from "../../src/logic/aigc-provider-registry";
 
 describe("AIGC Generate & Backfill", () => {
-  const projectRoot = path.join(process.cwd(), "projects/test-backfill");
+  const projectRoot = path.join(process.cwd(), "test/fixtures/projects/test-backfill");
   const yamlPath = path.join(projectRoot, "storyboards/shot1.yaml");
 
   beforeEach(async () => {

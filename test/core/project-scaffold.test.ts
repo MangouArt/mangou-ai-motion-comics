@@ -5,7 +5,7 @@ import yaml from 'js-yaml';
 import { runSplitGrid } from '../../src/split';
 
 describe('project scaffold', () => {
-  const projectRoot = path.join(process.cwd(), 'projects', 'test-scaffold');
+  const projectRoot = path.join(process.cwd(), 'test/fixtures/projects', 'test-scaffold');
 
   beforeEach(async () => {
     await fs.rm(projectRoot, { recursive: true, force: true }).catch(() => {});

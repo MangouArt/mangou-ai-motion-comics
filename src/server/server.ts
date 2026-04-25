@@ -309,7 +309,7 @@ const STATUS_HTML = `
     <p>这个仓库现在只承接 skill、provider、CLI 和只读镜像 API，不再内置 dashboard 前端构建产物。</p>
     <ul>
       <li>项目 API：<a href="/api/projects"><code>/api/projects</code></a></li>
-      <li>运行入口：<code>bun run mangou -- server start</code></li>
+      <li>运行入口：<code>./scripts/workflow/server-start.sh</code></li>
       <li>Dashboard 真相源：<code>mangou</code> 仓中的独立 dashboard 包</li>
     </ul>
   </div>

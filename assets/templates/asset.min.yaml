@@ -1,0 +1,14 @@
+meta:
+  id: "hero-001"
+  type: "character"
+  version: "1.0"
+content:
+  name: "角色名"
+  name_en: "Hero Name"
+  appearance: "这里写视觉特征。"
+tasks:
+  image:
+    provider: "bltai"
+    params:
+      model: "nano-banana-2"
+      prompt: "Character concept art."
