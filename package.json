@@ -2,7 +2,7 @@
   "name": "mangou-ai-motion-comics",
   "version": "3.0.0-local",
   "private": false,
-  "description": "Mangou AI Motion Comics - main product repo with skill docs, providers, CLI/runtime, and workspace template",
+  "description": "Mangou AI Motion Comics skill repository metadata. Runtime commands are Python-first; package.json is not an npm entrypoint.",
   "license": "FSL-1.1-Apache-2.0",
   "homepage": "https://www.mangou.art",
   "repository": {
@@ -26,21 +26,5 @@
   ],
   "engines": {
     "python": ">=3.11"
-  },
-  "scripts": {
-    "start": "./scripts/runtime/api-start.sh",
-    "mangou": "python3 -m mangou_skill.cli",
-    "typecheck": "python3 -m py_compile mangou_skill/*.py tests_python/*.py",
-    "test": "python3 -m unittest discover -s tests_python -p 'test_*.py' -v",
-    "ci": "python3 -m unittest discover -s tests_python -p 'test_*.py' -v",
-    "project:init": "./scripts/project/init.sh",
-    "project:stitch": "./scripts/project/stitch.sh",
-    "storyboard:generate": "./scripts/workflow/storyboard-generate.sh",
-    "storyboard:split": "./scripts/workflow/storyboard-split.sh",
-    "asset:generate": "./scripts/asset/generate.sh",
-    "runtime:api": "./scripts/runtime/api-start.sh",
-    "doctor:layout": "./scripts/doctor/check-layout.sh"
-  },
-  "dependencies": {},
-  "devDependencies": {}
+  }
 }

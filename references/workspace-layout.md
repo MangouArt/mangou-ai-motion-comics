@@ -46,6 +46,7 @@
 - `MANGOU_WORKSPACE_ROOT` 当前表示 **projects root**，不是 workspace parent。
 - 本地母仓通常设置或推断为 `Mango/workspace/projects`。
 - 容器化 Hermes / Feishu 环境没有本地路径 `/home/jachinshen/Sync/Mango/workspace`，应使用持久卷内路径 `/opt/data/workspace/projects`。
+- 如果 Zeabur 服务级环境变量存在，但 Hermes 的 tool shell 或 `execute_code` 读不到它，应显式使用 `/opt/data/workspace/projects` 作为 fallback；不要退回 `/opt/data` 或当前工作目录。
 - 执行 `project init` 后必须先确认实际落点，再继续写入资产定义或 storyboard。
 
 ## 飞书协作边界

@@ -1,18 +1,18 @@
 ---
 name: mangou-ai-motion-comics
-version: 3.0.0
-author: mangou-ai-studio
-homepage: https://www.mangou.art
-license: FSL-1.1-Apache-2.0
 description: Main product repository for AI motion comic production. Includes skill docs, provider adapters, CLI/runtime, workspace template, and local setup entrypoints.
 metadata:
+  version: 3.0.0
+  author: mangou-ai-studio
+  homepage: https://www.mangou.art
+  license: FSL-1.1-Apache-2.0
   skill_type: local_runtime
   installation_mode: repo-native
   operator_note: "mangou.art operated by Mangou AI Studio"
-tags: [ai-motion-comic, motion-comic, storyboard, image-generation, video-generation, production-pipeline, yaml, provider-runtime]
-display-name: Mangou AI 漫剧导演 / Motion Comic Director
-argument-hint: <project init|project stitch|storyboard generate|storyboard split|asset generate|runtime api> [...args]
-disable-model-invocation: true
+  tags: [ai-motion-comic, motion-comic, storyboard, image-generation, video-generation, production-pipeline, yaml, provider-runtime]
+  display_name: Mangou AI 漫剧导演 / Motion Comic Director
+  argument_hint: <project init|project stitch|storyboard generate|storyboard split|asset generate|runtime api> [...args]
+  disable_model_invocation: true
 ---
 
 # Mangou AI Motion Comics
@@ -49,6 +49,7 @@ Mangou checklist
 - [ ] 真实项目目录只认 <workspace>/projects/
 - [ ] 通过 workspace/.agents/skills/mangou-ai-motion-comics 挂载本仓时，优先在 Mango/workspace 作为 pwd 执行 helper scripts
 - [ ] `MANGOU_WORKSPACE_ROOT` 表示 **projects root**，不是 workspace parent；例如容器内应设为 `/opt/data/workspace/projects`
+- [ ] 若 Zeabur/Hermes 的 tool shell 或 execute_code 读不到 `MANGOU_WORKSPACE_ROOT`，但当前环境是 `/opt/data` 持久卷容器，必须使用 `/opt/data/workspace/projects` 作为 fallback；禁止退回 `/opt/data`
 - [ ] `project init` / `project stitch` 现在会优先尊重 `MANGOU_WORKSPACE_ROOT`（其次 `MANGOU_HOME + config.workspaceDir`，最后退回 `process.cwd()/projects`）
 - [ ] 执行 `storyboard generate` / `asset generate` / `storyboard split` 时，优先在包含 `project.json` 的项目根目录作为 cwd，`--path` 使用相对项目根路径
 - [ ] 先读 `references/workspace-layout.md`，再改 YAML

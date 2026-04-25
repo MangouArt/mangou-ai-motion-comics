@@ -17,7 +17,7 @@
 ## 推荐流程
 
 1. 从飞书消息或文档提取需求、参考素材和项目 ID。
-2. 确认 `MANGOU_WORKSPACE_ROOT` 指向 projects root，例如 `/opt/data/workspace/projects`。
+2. 确认 `MANGOU_WORKSPACE_ROOT` 指向 projects root，例如 `/opt/data/workspace/projects`；如果 Hermes tool 环境读不到该变量，但当前在 Zeabur `/opt/data` 持久卷中运行，使用 `/opt/data/workspace/projects` 作为显式 fallback。
 3. 如果项目不存在，执行 `./scripts/project/init.sh --name <project-id>`。
 4. 把需求整理为 `asset_defs/*.yaml` 或 `storyboards/*.yaml`，所有路径都相对项目根目录。
 5. 调用 `./scripts/asset/generate.sh`、`./scripts/workflow/storyboard-generate.sh`、`./scripts/workflow/storyboard-split.sh` 或 `./scripts/project/stitch.sh`。
