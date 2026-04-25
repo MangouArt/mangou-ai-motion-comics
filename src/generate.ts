@@ -182,6 +182,10 @@ async function resolveMediaParams(projectRoot: string, params: Record<string, an
     }
     params[key] = await Promise.all(params[key].map((input: any) => resolveBinaryInput(projectRoot, input)));
   }
+
+  if (Array.isArray(params.content)) {
+    params.content = await Promise.all(params.content.map((item: any) => resolveContentItem(projectRoot, item)));
+  }
 }
 
 async function resolveImageInput(projectRoot: string, input: any): Promise<any> {
@@ -215,6 +219,24 @@ async function resolveBinaryInput(projectRoot: string, input: any): Promise<any>
   }
 
   return await encodeLocalBinary(absPath);
+}
+
+async function resolveContentItem(projectRoot: string, item: any): Promise<any> {
+  if (!item || typeof item !== "object" || Array.isArray(item)) {
+    return item;
+  }
+
+  const next = JSON.parse(JSON.stringify(item));
+  if (next.type === "image_url" && next.image_url?.url !== undefined) {
+    next.image_url.url = await resolveImageInput(projectRoot, next.image_url.url);
+  }
+  if (next.type === "video_url" && next.video_url?.url !== undefined) {
+    next.video_url.url = await resolveBinaryInput(projectRoot, next.video_url.url);
+  }
+  if (next.type === "audio_url" && next.audio_url?.url !== undefined) {
+    next.audio_url.url = await resolveBinaryInput(projectRoot, next.audio_url.url);
+  }
+  return next;
 }
 
 async function assertMaterializedOutputsExist(projectRoot: string, relYamlPath: string, outputs: string[]) {

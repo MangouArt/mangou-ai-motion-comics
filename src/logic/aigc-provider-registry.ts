@@ -1,8 +1,10 @@
 #!/usr/bin/env bun
+import { ANYINT_PROVIDER } from '@logic/aigc-provider-anyint';
 import { BLTAI_PROVIDER } from '@logic/aigc-provider-bltai';
 import { EVOLINK_PROVIDER } from '@logic/aigc-provider-evolink';
 
 const PROVIDERS = new Map([
+  [ANYINT_PROVIDER.id, ANYINT_PROVIDER],
   [BLTAI_PROVIDER.id, BLTAI_PROVIDER],
   [EVOLINK_PROVIDER.id, EVOLINK_PROVIDER],
 ]);

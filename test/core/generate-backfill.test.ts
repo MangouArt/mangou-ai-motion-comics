@@ -263,6 +263,62 @@ describe("AIGC Generate & Backfill", () => {
     );
   });
 
+  it("runAIGC: resolves local anyint content image_url.url references into data urls", async () => {
+    await fs.mkdir(path.join(projectRoot, "assets/images"), { recursive: true });
+    await fs.writeFile(path.join(projectRoot, "assets/images/reference.png"), "ref-image");
+
+    const sourceDoc = {
+      meta: { id: "shot1" },
+      tasks: {
+        video: {
+          provider: "mock-provider",
+          params: {
+            model: "doubao-seedance-2-0-260128",
+            content: [
+              { type: "text", text: "Use a first frame" },
+              {
+                type: "image_url",
+                role: "first_frame",
+                image_url: { url: "assets/images/reference.png" },
+              },
+            ],
+          },
+        }
+      }
+    };
+    await fs.writeFile(yamlPath, yaml.dump(sourceDoc));
+
+    const mockProvider = {
+      id: "mock-provider",
+      env: { apiKey: "MOCK_KEY", baseUrl: "MOCK_BASE", defaultBaseUrl: "https://api.mock.ai" },
+      scopes: { video: "videos" },
+      buildPayload: vi.fn((_s: any, p: any) => p),
+      submit: vi.fn().mockResolvedValue("task-237"),
+      poll: vi.fn().mockResolvedValue({ status: "SUCCESS", data: { url: "https://example.com/cat.mp4" } }),
+      extractOutputs: () => ["https://example.com/cat.mp4"],
+    };
+    vi.spyOn(registry, "getAIGCProvider").mockReturnValue(mockProvider as any);
+    process.env.MOCK_KEY = "dummy";
+
+    await runAIGC({ yamlPath, type: "video" });
+
+    expect(mockProvider.buildPayload).toHaveBeenCalledWith(
+      "videos",
+      expect.objectContaining({
+        content: expect.arrayContaining([
+          expect.objectContaining({ type: "text", text: "Use a first frame" }),
+          expect.objectContaining({
+            type: "image_url",
+            role: "first_frame",
+            image_url: expect.objectContaining({
+              url: expect.stringMatching(/^data:image\/png;base64,/),
+            }),
+          }),
+        ]),
+      }),
+    );
+  });
+
   it("runAIGC: rejects missing localized outputs before writing audit logs", async () => {
     const sourceDoc = {
       meta: { id: "shot1" },

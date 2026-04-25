@@ -21,8 +21,17 @@ describe('AIGC provider registry', () => {
     });
   });
 
+  it('returns anyint provider with env metadata', () => {
+    const provider = getAIGCProvider('anyint');
+    expect(provider.id).toBe('anyint');
+    expect(provider.env).toMatchObject({
+      apiKey: 'ANYINT_API_KEY',
+      baseUrl: 'ANYINT_BASE_URL',
+    });
+  });
+
   it('only exposes the supported built-in providers', () => {
-    expect(listAIGCProviders().map((item) => item.id).sort()).toEqual(['bltai', 'evolink']);
+    expect(listAIGCProviders().map((item) => item.id).sort()).toEqual(['anyint', 'bltai', 'evolink']);
   });
 
   it('resolves provider env using provider metadata', () => {

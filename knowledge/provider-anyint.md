@@ -35,8 +35,8 @@
 7. `duration` 只接受 `4-15` 秒。
 8. `ratio` 只接受 `21:9`、`16:9`、`4:3`、`1:1`、`3:4`、`9:16`、`adaptive`。
 9. `resolution` 只接受 `480p`、`720p`。
-10. 本地媒体路径会先被 runtime 解析成 `data:` URL，再借用 EvoLink 上传接口换成远程 URL。
-11. 上传阶段使用 `EVOLINK_API_KEY`，生成阶段使用 `ANYINT_API_KEY`；两个 key 都要配置。
+10. 本地图片路径会先被 runtime 解析成 `data:` URL，再通过 AnyInt 的 `POST /files/upload` 上传为远程 URL，然后回填到 `content[].image_url.url`。
+11. 当前 AnyInt provider 生成阶段使用 `ANYINT_API_KEY`；文件上传走 `https://gateway.api.anyint.ai/files/upload`。
 
 ## 最小示例
 
