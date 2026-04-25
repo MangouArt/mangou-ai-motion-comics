@@ -10,10 +10,11 @@ npx skills add MangouArt/mangou-ai-motion-comics
 
 ```bash
 nix develop
-node bootstrap-runtime.mjs
+./scripts/doctor/check-layout.sh
+python3 -m unittest discover -s tests_python -p 'test_*.py' -v
 ```
 
-这个脚本现在承担的是本地 setup 入口，而不是下载额外 zip 再合并。
+本仓现在是 Python-only runtime；本地 setup 只做结构检查和 Python `unittest` 验证。
 
 本地 setup 完成后，优先通过 helper scripts 调用：
 
@@ -29,7 +30,7 @@ node bootstrap-runtime.mjs
 - `storyboard generate`
 - `asset generate`
 - `storyboard split`
-- `server start`
+- `runtime api`
 - 基础 CLI 入口
 - 基础测试链
 
@@ -37,7 +38,6 @@ node bootstrap-runtime.mjs
 
 - Python >= 3.11
 - 通过母仓根目录 `flake.nix` 进入开发环境
-- Node.js（仅用于 `bootstrap-runtime.mjs`）
 - `ffmpeg` 在系统 PATH 中
 - 至少一套可用的 provider 环境变量
 
@@ -58,10 +58,10 @@ python3 -m unittest discover -s tests_python -p 'test_*.py' -v
 当前只保留这一条安装路径：
 - `npx skills add MangouArt/mangou-ai-motion-comics`
 
-不要再使用任何 zip 包分发或 `mangou/skill-src/mangou` 旧链路。
+不要再使用任何 zip 包分发或旧 skill 源目录链路。
 
 ## 工作区规则
 
 - 真实项目目录只认 `<workspace>/projects/`
 - 不要把 skill 根目录当成项目目录
-- `test/fixtures/projects/` 只是测试夹具，不是工作区
+- `tests_python/` 只放 Python `unittest` 测试，不是真实工作区

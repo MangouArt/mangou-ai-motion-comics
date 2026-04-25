@@ -39,7 +39,7 @@
 2. 不要跨项目引用别的 `assets/`。
 3. 不要手动删除 `tasks.jsonl`。
 4. skill 根目录与项目工作区是两个不同层级，不要把 `projects/` 放进 skill 根目录。
-5. 先通过当前 agent 的技能机制定位实际 `<skill-root>`，再执行 runtime 合并或 Bun 命令。
+5. 先通过当前 agent 的技能机制定位实际 `<skill-root>`，再执行 Python runtime helper scripts。
 
 ## 运行时根目录
 

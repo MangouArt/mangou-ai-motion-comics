@@ -61,6 +61,14 @@ class MangouCliProjectInitTests(unittest.TestCase):
             env_projects_root / "shared-env-project",
         )
 
+    def test_runtime_paths_cli_uses_runtime_api_naming(self) -> None:
+        workspace_root = self.temp_root / "workspace"
+        (workspace_root / "projects").mkdir(parents=True)
+
+        exit_code = main(["runtime", "paths", "--workspace", str(workspace_root)])
+
+        self.assertEqual(exit_code, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

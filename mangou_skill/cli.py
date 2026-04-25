@@ -5,7 +5,7 @@ import json
 
 from .generate import run_aigc
 from .project import init_project
-from .server import resolve_server_app_root, resolve_server_data_root, start_http_server
+from .runtime_api import resolve_runtime_api_app_root, resolve_runtime_api_data_root, start_runtime_api
 from .stitch import stitch_project
 from .storyboard import run_split_grid
 
@@ -50,13 +50,14 @@ Resources:
   project
   storyboard
   asset
-  server
+  runtime api
 
 Examples:
   python3 -m mangou_skill.cli project init --name my-movie
   python3 -m mangou_skill.cli project stitch --id my-movie
   python3 -m mangou_skill.cli storyboard generate --path ./workspace/projects/demo/storyboards/shot-001.yaml --type image
   python3 -m mangou_skill.cli storyboard split --path ./workspace/projects/demo/storyboards/master.yaml
+  python3 -m mangou_skill.cli runtime api --port 3000 --workspace ./workspace
 """.strip()
     )
 
@@ -106,17 +107,17 @@ def main(argv: list[str] | None = None) -> int:
             run_aigc(yaml_path, "image")
             return 0
 
-        if resource == "server" and action == "paths":
-            data_root = resolve_server_data_root(str(flags.get("workspace") or flags.get("dataRoot") or "."))
-            print(json.dumps({"appRoot": str(resolve_server_app_root()), "dataRoot": str(data_root)}, ensure_ascii=False))
+        if resource == "runtime" and action == "paths":
+            data_root = resolve_runtime_api_data_root(str(flags.get("workspace") or flags.get("dataRoot") or "."))
+            print(json.dumps({"appRoot": str(resolve_runtime_api_app_root()), "dataRoot": str(data_root)}, ensure_ascii=False))
             return 0
 
-        if resource == "server" and action == "start":
+        if resource == "runtime" and action == "api":
             port = int(str(flags.get("port") or (positionals[0] if positionals else "3000")))
-            data_root = resolve_server_data_root(str(flags.get("workspace") or flags.get("dataRoot") or "."))
-            server = start_http_server(resolve_server_app_root(), data_root, port=port)
-            print(f"[mangou] Starting readonly mirror server on port {port}...")
-            print(f"[mangou] App Root: {resolve_server_app_root()}")
+            data_root = resolve_runtime_api_data_root(str(flags.get("workspace") or flags.get("dataRoot") or "."))
+            server = start_runtime_api(resolve_runtime_api_app_root(), data_root, port=port)
+            print(f"[mangou] Starting runtime API on port {port}...")
+            print(f"[mangou] App Root: {resolve_runtime_api_app_root()}")
             print(f"[mangou] Data Root: {data_root}")
             try:
                 server.serve_forever()

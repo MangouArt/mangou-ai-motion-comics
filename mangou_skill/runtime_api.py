@@ -16,11 +16,11 @@ ASSET_TYPES = {"character", "scene", "prop"}
 STORYBOARD_REF_KEYS = ("characters", "scenes", "props", "assets")
 
 
-def resolve_server_app_root() -> Path:
+def resolve_runtime_api_app_root() -> Path:
     return Path(__file__).resolve().parent.parent
 
 
-def resolve_server_data_root(input_root: str | Path | None = None) -> Path:
+def resolve_runtime_api_data_root(input_root: str | Path | None = None) -> Path:
     data_root = Path(input_root or Path.cwd()).resolve()
     projects_path = data_root / "projects"
     if projects_path.is_dir():
@@ -173,10 +173,10 @@ STATUS_HTML = """<!DOCTYPE html>
   <div class="card">
     <div class="status"><span class="dot"></span>Runtime Active</div>
     <h1>Mangou Motion Comics Runtime</h1>
-    <p>这个仓库现在只承接 skill、provider、CLI 和只读镜像 API，不再内置 dashboard 前端构建产物。</p>
+    <p>这个仓库现在只承接 skill、provider、CLI 和 Python runtime API，不再内置 dashboard 前端构建产物。</p>
     <ul>
       <li>项目 API：<a href="/api/projects"><code>/api/projects</code></a></li>
-      <li>运行入口：<code>./scripts/workflow/server-start.sh</code></li>
+      <li>运行入口：<code>./scripts/runtime/api-start.sh</code></li>
       <li>Dashboard 真相源：<code>mangou</code> 仓中的独立 dashboard 包</li>
     </ul>
   </div>
@@ -185,7 +185,7 @@ STATUS_HTML = """<!DOCTYPE html>
 """
 
 
-def start_http_server(app_root: str | Path, data_root: str | Path, port: int = 3000) -> ThreadingHTTPServer:
+def start_runtime_api(app_root: str | Path, data_root: str | Path, port: int = 3000) -> ThreadingHTTPServer:
     app_root_path = Path(app_root).resolve()
     data_root_path = Path(data_root).resolve()
     project_manager = create_project_manager(data_root_path)

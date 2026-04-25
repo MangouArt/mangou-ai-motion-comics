@@ -28,7 +28,7 @@
     "python": ">=3.11"
   },
   "scripts": {
-    "start": "./scripts/workflow/server-start.sh",
+    "start": "./scripts/runtime/api-start.sh",
     "mangou": "python3 -m mangou_skill.cli",
     "typecheck": "python3 -m py_compile mangou_skill/*.py tests_python/*.py",
     "test": "python3 -m unittest discover -s tests_python -p 'test_*.py' -v",
@@ -38,7 +38,7 @@
     "storyboard:generate": "./scripts/workflow/storyboard-generate.sh",
     "storyboard:split": "./scripts/workflow/storyboard-split.sh",
     "asset:generate": "./scripts/asset/generate.sh",
-    "server:start": "./scripts/workflow/server-start.sh",
+    "runtime:api": "./scripts/runtime/api-start.sh",
     "doctor:layout": "./scripts/doctor/check-layout.sh"
   },
   "dependencies": {},

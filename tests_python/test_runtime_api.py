@@ -6,17 +6,17 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from mangou_skill.server import (
+from mangou_skill.runtime_api import (
     create_project_manager,
     get_project_id_from_api_path,
     get_project_ui_data,
-    resolve_server_app_root,
-    resolve_server_data_root,
+    resolve_runtime_api_app_root,
+    resolve_runtime_api_data_root,
 )
 from mangou_skill.yaml_utils import write_yaml_file
 
 
-class ServerSupportTests(unittest.TestCase):
+class RuntimeApiSupportTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_root = Path(tempfile.mkdtemp(prefix="mangou-server-test-")).resolve()
         self.addCleanup(lambda: shutil.rmtree(self.temp_root, ignore_errors=True))
@@ -38,12 +38,12 @@ class ServerSupportTests(unittest.TestCase):
             encoding="utf-8",
         )
 
-    def test_resolves_server_paths(self) -> None:
+    def test_resolves_runtime_api_paths(self) -> None:
         workspace_root = self.temp_root / "custom-workspace"
         (workspace_root / "projects").mkdir(parents=True, exist_ok=True)
 
-        self.assertEqual(resolve_server_app_root(), Path(__file__).resolve().parents[1])
-        self.assertEqual(resolve_server_data_root(workspace_root), workspace_root / "projects")
+        self.assertEqual(resolve_runtime_api_app_root(), Path(__file__).resolve().parents[1])
+        self.assertEqual(resolve_runtime_api_data_root(workspace_root), workspace_root / "projects")
 
     def test_projects_and_snapshots_share_same_custom_workspace_root(self) -> None:
         write_yaml_file(

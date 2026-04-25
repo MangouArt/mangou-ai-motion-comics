@@ -21,8 +21,8 @@
 # 生成资产
 ./scripts/asset/generate.sh --path asset_defs/<asset>.yaml
 
-# 启动本地只读服务
-./scripts/workflow/server-start.sh --port 3000
+# 启动本地 runtime API
+./scripts/runtime/api-start.sh --port 3000
 
 # 检查 skill 结构
 ./scripts/doctor/check-layout.sh
@@ -37,5 +37,5 @@ python3 -m unittest discover -s tests_python -p 'test_*.py' -v
 2. provider 行为异常时，同时检查：`references/`、provider adapter、测试。
 3. 真实项目目录只认 `<workspace>/projects/`。
 4. 安装与升级只走 `npx skills add MangouArt/mangou-ai-motion-comics` 主流程，不再使用任何 zip 包分发。
-5. `project init`、`project stitch`、`storyboard split`、`server start` 已切到 Python 主链。
-6. `storyboard generate`、`asset generate` 也已切到 Python provider 主链；默认开发验证不再依赖 Bun/npm。
+5. `project init`、`project stitch`、`storyboard split`、`runtime api` 均走 Python 主链。
+6. `storyboard generate`、`asset generate` 也走 Python provider 主链；默认开发验证不依赖旧 TS 测试链。

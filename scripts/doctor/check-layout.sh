@@ -8,6 +8,7 @@ required_paths=(
   "SKILL.md"
   "scripts/project/init.sh"
   "scripts/asset/generate.sh"
+  "scripts/runtime/api-start.sh"
   "scripts/workflow/storyboard-generate.sh"
   "references/workspace-layout.md"
   "references/asset-generation.md"
