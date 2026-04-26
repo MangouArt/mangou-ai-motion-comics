@@ -28,7 +28,7 @@ class MangouCliProjectInitTests(unittest.TestCase):
         shutil.rmtree(self.temp_root, ignore_errors=True)
 
     def test_project_init_creates_directory_structure(self) -> None:
-        exit_code = main(["project", "init", "--name", "py-cli-project"])
+        exit_code = main(["project", "init", "--name", "py-cli-project", "--workspace", str(self.temp_root)])
         self.assertEqual(exit_code, 0)
 
         project_root = self.temp_root / "projects" / "py-cli-project"
@@ -39,6 +39,12 @@ class MangouCliProjectInitTests(unittest.TestCase):
 
         project_json = json.loads((project_root / "project.json").read_text(encoding="utf-8"))
         self.assertEqual(project_json["id"], "py-cli-project")
+
+    def test_project_init_without_workspace_refuses_cwd_fallback(self) -> None:
+        exit_code = main(["project", "init", "--name", "unsafe-project"])
+
+        self.assertEqual(exit_code, 1)
+        self.assertFalse((self.temp_root / "projects" / "unsafe-project").exists())
 
     def test_project_init_respects_mangou_workspace_root(self) -> None:
         env_projects_root = self.temp_root / "runtime-home" / "projects"

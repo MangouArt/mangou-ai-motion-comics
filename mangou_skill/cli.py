@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 import json
 
-from .generate import run_aigc
+from .generate import print_json_summary, resume_aigc, run_aigc_summary
 from .project import init_project
 from .runtime_api import resolve_runtime_api_app_root, resolve_runtime_api_data_root, start_runtime_api
 from .stitch import stitch_project
@@ -54,8 +54,10 @@ Resources:
 
 Examples:
   python3 -m mangou_skill.cli project init --name my-movie
+  python3 -m mangou_skill.cli project init --name my-movie --workspace ./workspace
   python3 -m mangou_skill.cli project stitch --id my-movie
   python3 -m mangou_skill.cli storyboard generate --path ./workspace/projects/demo/storyboards/shot-001.yaml --type image
+  python3 -m mangou_skill.cli storyboard resume --path ./workspace/projects/demo/storyboards/shot-001.yaml --type video
   python3 -m mangou_skill.cli storyboard split --path ./workspace/projects/demo/storyboards/master.yaml
   python3 -m mangou_skill.cli runtime api --port 3000 --workspace ./workspace
 """.strip()
@@ -74,7 +76,11 @@ def main(argv: list[str] | None = None) -> int:
             name = str(flags.get("name") or (positionals[0] if positionals else "")).strip()
             if not name:
                 raise ValueError("Project name is required. Use --name [name] or positional arg.")
-            init_project(name)
+            init_project(
+                name,
+                workspace=flags.get("workspace"),
+                projects_root=flags.get("projectsRoot"),
+            )
             return 0
 
         if resource == "project" and action == "stitch":
@@ -97,14 +103,29 @@ def main(argv: list[str] | None = None) -> int:
             if not yaml_path:
                 raise ValueError("Storyboard YAML path is required.")
             task_type = str(flags.get("type") or "image").strip()
-            run_aigc(yaml_path, task_type)
+            summary = run_aigc_summary(yaml_path, task_type)
+            if flags.get("json"):
+                print_json_summary(summary)
+            return 0
+
+        if resource == "storyboard" and action == "resume":
+            yaml_path = str(flags.get("path") or (positionals[0] if positionals else "")).strip()
+            if not yaml_path:
+                raise ValueError("Storyboard YAML path is required.")
+            task_type = str(flags.get("type") or "image").strip()
+            task_id = str(flags.get("id") or flags.get("taskId") or "").strip() or None
+            summary = resume_aigc(yaml_path, task_type, task_id=task_id)
+            if flags.get("json"):
+                print_json_summary(summary)
             return 0
 
         if resource == "asset" and action == "generate":
             yaml_path = str(flags.get("path") or (positionals[0] if positionals else "")).strip()
             if not yaml_path:
                 raise ValueError("Asset YAML path is required.")
-            run_aigc(yaml_path, "image")
+            summary = run_aigc_summary(yaml_path, "image")
+            if flags.get("json"):
+                print_json_summary(summary)
             return 0
 
         if resource == "runtime" and action == "paths":

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import base64
+import json
 import mimetypes
 import os
 from copy import deepcopy
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -48,7 +50,95 @@ def load_dotenv(cwd: Path | None = None) -> None:
                 os.environ[key] = value
 
 
+@dataclass(frozen=True)
+class GenerationSummary:
+    ok: bool
+    project_root: str
+    storyboard: str
+    type: str
+    provider: str
+    model: str | None
+    task_id: str
+    local_outputs: list[str]
+    remote_outputs: list[str]
+    outputs: list[dict[str, Any]]
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "ok": self.ok,
+            "project_root": self.project_root,
+            "storyboard": self.storyboard,
+            "type": self.type,
+            "provider": self.provider,
+            "model": self.model,
+            "task_id": self.task_id,
+            "local_outputs": self.local_outputs,
+            "remote_outputs": self.remote_outputs,
+            "outputs": self.outputs,
+        }
+
+
+@dataclass(frozen=True)
+class GenerationContext:
+    yaml_path: Path
+    project_root: Path
+    rel_yaml_path: str
+    task_config: dict[str, Any]
+    provider_id: str
+    provider: Any
+    api_key: str
+    base_url: str
+    scope: str
+    model: str | None
+
+
 def run_aigc(yaml_path: str | Path, task_type: str) -> list[str]:
+    return run_aigc_summary(yaml_path, task_type).local_outputs
+
+
+def run_aigc_summary(yaml_path: str | Path, task_type: str) -> GenerationSummary:
+    context = prepare_generation_context(yaml_path, task_type)
+    params = deepcopy(context.task_config.get("params") or {})
+    resolve_media_params(context.project_root, params)
+
+    payload = context.provider.build_payload(context.scope, params)
+    print(f"[mangou] Submitting {task_type} task via {context.provider_id}...")
+    submit_result = context.provider.submit(base_url=context.base_url, api_key=context.api_key, scope=context.scope, payload=payload)
+    task_id = submit_result if isinstance(submit_result, str) else "unknown"
+
+    update_yaml(
+        context.yaml_path,
+        {
+            f"tasks.{task_type}.latest": {
+                "status": "running",
+                "remote_status": "running",
+                "backfill_status": "pending",
+                "task_id": task_id,
+                "updated_at": iso_now(),
+            }
+        },
+    )
+
+    print(f"[mangou] Task {task_id} is running. Polling for results...")
+    try:
+        return poll_and_materialize(context, task_type, task_id, submit_result)
+    except KeyboardInterrupt:
+        mark_generation_interrupted(context, task_type, task_id)
+        print_resume_hint(context.rel_yaml_path, task_type, task_id)
+        raise
+
+
+def resume_aigc(yaml_path: str | Path, task_type: str, task_id: str | None = None) -> GenerationSummary:
+    context = prepare_generation_context(yaml_path, task_type)
+    latest = context.task_config.get("latest") if isinstance(context.task_config.get("latest"), dict) else {}
+    resolved_task_id = str(task_id or latest.get("task_id") or "").strip()
+    if not resolved_task_id:
+        raise RuntimeError(f"No resumable task_id found for {task_type} task in {context.rel_yaml_path}")
+    print(f"[mangou] Resuming {task_type} task {resolved_task_id} via {context.provider_id}...")
+    return poll_and_materialize(context, task_type, resolved_task_id, resolved_task_id)
+
+
+def prepare_generation_context(yaml_path: str | Path, task_type: str) -> GenerationContext:
     if task_type not in {"image", "video"}:
         raise ValueError(f"Unsupported task type: {task_type}")
 
@@ -73,31 +163,29 @@ def run_aigc(yaml_path: str | Path, task_type: str) -> list[str]:
     if not api_key:
         raise RuntimeError(f"API Key missing for provider: {provider_id}. Check your .env file.")
 
-    params = deepcopy(task_config.get("params") or {})
-    resolve_media_params(project_root, params)
+    params = task_config.get("params") or {}
+    model = str(params.get("model")).strip() if isinstance(params, dict) and params.get("model") else None
 
     scope = provider.scopes.get(task_type) or ("images" if task_type == "image" else "videos")
-    payload = provider.build_payload(scope, params)
-    print(f"[mangou] Submitting {task_type} task via {provider_id}...")
-    submit_result = provider.submit(base_url=base_url, api_key=api_key, scope=scope, payload=payload)
-    task_id = submit_result if isinstance(submit_result, str) else "unknown"
-
-    update_yaml(
-        absolute_yaml_path,
-        {
-            f"tasks.{task_type}.latest": {
-                "status": "running",
-                "task_id": task_id,
-                "updated_at": iso_now(),
-            }
-        },
+    return GenerationContext(
+        yaml_path=absolute_yaml_path,
+        project_root=project_root,
+        rel_yaml_path=rel_yaml_path,
+        task_config=task_config,
+        provider_id=provider_id,
+        provider=provider,
+        api_key=api_key,
+        base_url=base_url,
+        scope=scope,
+        model=model,
     )
 
-    print(f"[mangou] Task {task_id} is running. Polling for results...")
-    result = provider.poll(base_url=base_url, api_key=api_key, scope=scope, task_id=submit_result)
-    outputs = provider.extract_outputs(scope, result)
+
+def poll_and_materialize(context: GenerationContext, task_type: str, task_id: str, provider_task_id: Any) -> GenerationSummary:
+    result = context.provider.poll(base_url=context.base_url, api_key=context.api_key, scope=context.scope, task_id=provider_task_id)
+    outputs = context.provider.extract_outputs(context.scope, result)
     update_yaml(
-        absolute_yaml_path,
+        context.yaml_path,
         {
             f"tasks.{task_type}.latest": {
                 "status": "running",
@@ -110,24 +198,24 @@ def run_aigc(yaml_path: str | Path, task_type: str) -> list[str]:
         },
     )
     append_task_event(
-        project_root,
+        context.project_root,
         {
             "id": task_id,
             "type": f"{task_type}_generate",
             "status": "completed",
-            "provider": provider_id,
-            "target": rel_yaml_path,
+            "provider": context.provider_id,
+            "target": context.rel_yaml_path,
             "output": outputs,
             "event": "remote_completed",
         },
     )
 
     try:
-        local_outputs = materialize_outputs(project_root, rel_yaml_path, task_type, task_id, outputs)
-        assert_outputs_exist(project_root, rel_yaml_path, local_outputs)
+        local_outputs = materialize_outputs(context.project_root, context.rel_yaml_path, task_type, task_id, outputs)
+        assert_outputs_exist(context.project_root, context.rel_yaml_path, local_outputs)
     except Exception as exc:
         update_yaml(
-            absolute_yaml_path,
+            context.yaml_path,
             {
                 f"tasks.{task_type}.latest": {
                     "status": "running",
@@ -141,13 +229,13 @@ def run_aigc(yaml_path: str | Path, task_type: str) -> list[str]:
             },
         )
         append_task_event(
-            project_root,
+            context.project_root,
             {
                 "id": f"{task_id}:materialize",
                 "type": f"{task_type}_materialize",
                 "status": "failed",
-                "provider": provider_id,
-                "target": rel_yaml_path,
+                "provider": context.provider_id,
+                "target": context.rel_yaml_path,
                 "output": outputs,
                 "error": str(exc),
                 "event": "backfill_failed",
@@ -157,7 +245,7 @@ def run_aigc(yaml_path: str | Path, task_type: str) -> list[str]:
 
     primary_output = local_outputs[0] if local_outputs else ""
     update_yaml(
-        absolute_yaml_path,
+        context.yaml_path,
         {
             f"tasks.{task_type}.latest": {
                 "status": "completed",
@@ -172,18 +260,69 @@ def run_aigc(yaml_path: str | Path, task_type: str) -> list[str]:
         },
     )
     append_task_event(
-        project_root,
+        context.project_root,
         {
             "id": task_id,
             "type": f"{task_type}_generate",
             "status": "success",
-            "provider": provider_id,
-            "target": rel_yaml_path,
+            "provider": context.provider_id,
+            "target": context.rel_yaml_path,
             "output": primary_output,
         },
     )
     print(f"[mangou] Successfully generated {task_type}: {primary_output}")
-    return local_outputs
+    return GenerationSummary(
+        ok=True,
+        project_root=str(context.project_root),
+        storyboard=context.rel_yaml_path,
+        type=task_type,
+        provider=context.provider_id,
+        model=context.model,
+        task_id=task_id,
+        local_outputs=local_outputs,
+        remote_outputs=outputs,
+        outputs=describe_outputs(context.project_root, local_outputs),
+    )
+
+
+def mark_generation_interrupted(context: GenerationContext, task_type: str, task_id: str) -> None:
+    update_yaml(
+        context.yaml_path,
+        {
+            f"tasks.{task_type}.latest": {
+                "status": "interrupted",
+                "remote_status": "running",
+                "backfill_status": "pending",
+                "task_id": task_id,
+                "updated_at": iso_now(),
+            }
+        },
+    )
+    append_task_event(
+        context.project_root,
+        {
+            "id": task_id,
+            "type": f"{task_type}_generate",
+            "status": "interrupted",
+            "provider": context.provider_id,
+            "target": context.rel_yaml_path,
+            "event": "interrupted",
+        },
+    )
+
+
+def print_resume_hint(rel_yaml_path: str, task_type: str, task_id: str) -> None:
+    print(
+        "\n[mangou] Generation interrupted, but the remote task may still be running.\n"
+        "[mangou] Resume with:\n"
+        f"  mangou storyboard resume --path {rel_yaml_path} --type {task_type}\n"
+        f"[mangou] Task id: {task_id}",
+        flush=True,
+    )
+
+
+def print_json_summary(summary: GenerationSummary) -> None:
+    print(json.dumps(summary.to_dict(), ensure_ascii=False))
 
 
 def resolve_media_params(project_root: Path, params: dict[str, Any]) -> None:
@@ -289,6 +428,21 @@ def assert_outputs_exist(project_root: Path, rel_yaml_path: str, outputs: list[s
         absolute_output = (project_root / output).resolve()
         if not absolute_output.exists():
             raise RuntimeError(f"Materialized output not found for {rel_yaml_path}: {output}")
+
+
+def describe_outputs(project_root: Path, outputs: list[str]) -> list[dict[str, Any]]:
+    descriptions: list[dict[str, Any]] = []
+    for output in outputs:
+        item: dict[str, Any] = {"path": output}
+        if output.startswith("http://") or output.startswith("https://") or output.startswith("data:"):
+            descriptions.append(item)
+            continue
+        absolute_output = (project_root / output).resolve()
+        if absolute_output.exists():
+            item["bytes"] = absolute_output.stat().st_size
+            item["mime"] = MIME_BY_EXTENSION.get(absolute_output.suffix.lower().lstrip(".")) or mimetypes.guess_type(absolute_output.name)[0]
+        descriptions.append(item)
+    return descriptions
 
 
 def update_yaml(yaml_path: Path, updates: dict[str, Any]) -> None:

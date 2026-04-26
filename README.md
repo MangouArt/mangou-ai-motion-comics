@@ -84,9 +84,11 @@ python3 -m unittest discover -s tests_python -p 'test_*.py' -v
 已经切到 Python 的入口：
 
 ```bash
-./scripts/project/init.sh --name <project-id>
+./scripts/project/init.sh --name <project-id> --workspace <workspace-root>
 ./scripts/project/stitch.sh --id <project-id>
 ./scripts/workflow/storyboard-generate.sh --path storyboards/<shot>.yaml --type image
+./scripts/workflow/storyboard-generate.sh --path storyboards/<shot>.yaml --type video --json
+./scripts/workflow/storyboard-resume.sh --path storyboards/<shot>.yaml --type video
 ./scripts/asset/generate.sh --path asset_defs/<asset>.yaml
 ./scripts/workflow/storyboard-split.sh --path <storyboard-yaml>
 ./scripts/runtime/api-start.sh --port 3000

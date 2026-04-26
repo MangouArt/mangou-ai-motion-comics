@@ -44,6 +44,36 @@ def resolve_project_root(project_id: str, cwd: Path | None = None) -> Path:
     return resolve_projects_root(cwd) / project_id
 
 
+def resolve_explicit_projects_root(
+    cwd: Path | None = None,
+    workspace: str | Path | object | None = None,
+    projects_root: str | Path | object | None = None,
+) -> Path:
+    if projects_root:
+        return Path(str(projects_root)).expanduser().resolve()
+    if workspace:
+        return (Path(str(workspace)).expanduser().resolve() / load_config(cwd).workspace_dir).resolve()
+
+    explicit_projects_root = os.environ.get("MANGOU_WORKSPACE_ROOT")
+    if explicit_projects_root and explicit_projects_root.strip():
+        return Path(explicit_projects_root.strip()).expanduser().resolve()
+
+    env_root = os.environ.get("MANGOU_HOME")
+    if env_root and env_root.strip():
+        return (Path(env_root.strip()).expanduser().resolve() / load_config(cwd).workspace_dir).resolve()
+
+    current = (cwd or Path.cwd()).resolve()
+    if (current / "project.json").exists():
+        return current.parent
+    if (current / "projects").is_dir() and ((current / "config.json").exists() or (current / "projects.json").exists()):
+        return current / "projects"
+
+    raise RuntimeError(
+        "MANGOU_WORKSPACE_ROOT is not set and current directory is not a Mangou workspace. "
+        "Set MANGOU_WORKSPACE_ROOT, run from an existing project root, or pass --workspace/--projects-root."
+    )
+
+
 def infer_project_root(file_path: Path | str) -> Path:
     current = Path(file_path).resolve().parent
     while True:
@@ -63,11 +93,16 @@ class ProjectInitResult:
     project_root: Path
 
 
-def init_project(project_id: str, cwd: Path | None = None) -> ProjectInitResult:
+def init_project(
+    project_id: str,
+    cwd: Path | None = None,
+    workspace: str | Path | object | None = None,
+    projects_root: str | Path | object | None = None,
+) -> ProjectInitResult:
     if not project_id.strip():
         raise ValueError("Project name is required.")
 
-    project_root = resolve_project_root(project_id, cwd)
+    project_root = resolve_explicit_projects_root(cwd, workspace=workspace, projects_root=projects_root) / project_id
     print(f"[mangou] Initializing project: {project_id} at {project_root}")
 
     for rel in PROJECT_DIRS:
