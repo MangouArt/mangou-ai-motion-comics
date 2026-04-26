@@ -9,6 +9,7 @@ from pathlib import Path
 
 from mangou_skill.cli import main
 from mangou_skill.project import resolve_project_root
+from mangou_skill.project_manager import ProjectManager
 
 
 class MangouCliProjectInitTests(unittest.TestCase):
@@ -45,6 +46,17 @@ class MangouCliProjectInitTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 1)
         self.assertFalse((self.temp_root / "projects" / "unsafe-project").exists())
+
+    def test_project_manager_without_workspace_refuses_cwd_fallback(self) -> None:
+        with self.assertRaisesRegex(RuntimeError, "MANGOU_WORKSPACE_ROOT is not set"):
+            ProjectManager()
+
+    def test_project_manager_accepts_explicit_workspace(self) -> None:
+        workspace_root = self.temp_root / "explicit-workspace"
+        manager = ProjectManager(workspace_root=workspace_root)
+
+        self.assertEqual(manager.workspace_root, workspace_root)
+        self.assertEqual(manager.projects_root, workspace_root / "projects")
 
     def test_project_init_respects_mangou_workspace_root(self) -> None:
         env_projects_root = self.temp_root / "runtime-home" / "projects"

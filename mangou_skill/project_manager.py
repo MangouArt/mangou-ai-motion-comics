@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .config import load_config
+from .project import resolve_explicit_projects_root
 
 
 @dataclass
@@ -21,26 +22,27 @@ class ProjectMetadata:
 
 
 def _resolve_workspace_root() -> Path:
-    env_root = os.environ.get("MANGOU_HOME")
-    if env_root and env_root.strip():
-        return Path(env_root.strip()).resolve()
-    explicit_projects_root = os.environ.get("MANGOU_WORKSPACE_ROOT")
-    if explicit_projects_root and explicit_projects_root.strip():
-        return Path(explicit_projects_root.strip()).resolve().parent
-    return Path.cwd().resolve()
+    return resolve_explicit_projects_root().parent
 
 
 def _resolve_projects_root(workspace_root: Path) -> Path:
     explicit_projects_root = os.environ.get("MANGOU_WORKSPACE_ROOT")
     if explicit_projects_root and explicit_projects_root.strip():
         return Path(explicit_projects_root.strip()).resolve()
-    return workspace_root / load_config(workspace_root).workspace_dir
+    if os.environ.get("MANGOU_HOME"):
+        return workspace_root / load_config(workspace_root).workspace_dir
+    return resolve_explicit_projects_root()
 
 
 class ProjectManager:
     def __init__(self, workspace_root: str | Path | None = None, projects_root: str | Path | None = None) -> None:
         self.workspace_root = Path(workspace_root).resolve() if workspace_root else _resolve_workspace_root()
-        self.projects_root = Path(projects_root).resolve() if projects_root else _resolve_projects_root(self.workspace_root)
+        if projects_root:
+            self.projects_root = Path(projects_root).resolve()
+        elif workspace_root:
+            self.projects_root = self.workspace_root / load_config(self.workspace_root).workspace_dir
+        else:
+            self.projects_root = _resolve_projects_root(self.workspace_root)
         self.index_path = self.workspace_root / "projects.json"
 
     def init(self) -> None:

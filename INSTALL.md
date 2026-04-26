@@ -19,7 +19,7 @@ python3 -m unittest discover -s tests_python -p 'test_*.py' -v
 本地 setup 完成后，优先通过 helper scripts 调用：
 
 ```bash
-./scripts/project/init.sh --name <project-id>
+./scripts/project/init.sh --name <project-id> --workspace <workspace-root>
 ./scripts/workflow/storyboard-generate.sh --path storyboards/<shot>.yaml --type image
 ./scripts/asset/generate.sh --path asset_defs/<asset>.yaml
 ```
@@ -66,3 +66,4 @@ python3 -m unittest discover -s tests_python -p 'test_*.py' -v
 - 不要把 skill 根目录当成项目目录
 - `tests_python/` 只放 Python `unittest` 测试，不是真实工作区
 - `MANGOU_WORKSPACE_ROOT` 表示 projects root，不是 workspace parent
+- `MANGOU_WORKSPACE_ROOT` 未设置时，初始化项目必须显式传 `--workspace` 或 `--projects-root`

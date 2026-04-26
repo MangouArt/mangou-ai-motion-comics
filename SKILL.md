@@ -49,8 +49,8 @@ Mangou checklist
 - [ ] 开发和测试统一从母仓根目录执行 `nix develop`
 - [ ] 真实项目目录只认 `<projects-root>/<project-id>/`
 - [ ] `MANGOU_WORKSPACE_ROOT` 表示 **projects root**，不是 workspace parent
-- [ ] 如果 `MANGOU_WORKSPACE_ROOT` 不存在，先让用户或当前运行环境指定 projects root；不要把 skill 根目录当项目根
-- [ ] `project init` / `project stitch` 现在会优先尊重 `MANGOU_WORKSPACE_ROOT`（其次 `MANGOU_HOME + config.workspaceDir`，最后退回 `process.cwd()/projects`）
+- [ ] 如果 `MANGOU_WORKSPACE_ROOT` 不存在，先让用户或当前运行环境指定 projects root；不要把 skill 根目录当项目根，也不要在任意 cwd 下隐式创建 `./projects`
+- [ ] `project init` / `project stitch` 优先尊重 `MANGOU_WORKSPACE_ROOT`；初始化新项目时也可显式传 `--workspace` 或 `--projects-root`
 - [ ] 执行 `storyboard generate` / `asset generate` / `storyboard split` 时，优先在包含 `project.json` 的项目根目录作为 cwd，`--path` 使用相对项目根路径
 - [ ] 先读 `references/workspace-layout.md`，再改 YAML
 - [ ] 生成后只信任 tasks.jsonl 和 YAML latest 回填
