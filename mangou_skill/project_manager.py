@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .config import load_config
-from .project import resolve_explicit_projects_root
+from .project import resolve_workspace_and_projects_root
 
 
 @dataclass
@@ -22,16 +22,13 @@ class ProjectMetadata:
 
 
 def _resolve_workspace_root() -> Path:
-    return resolve_explicit_projects_root().parent
+    return resolve_workspace_and_projects_root()[0]
 
 
 def _resolve_projects_root(workspace_root: Path) -> Path:
-    explicit_projects_root = os.environ.get("MANGOU_WORKSPACE_ROOT")
-    if explicit_projects_root and explicit_projects_root.strip():
-        return Path(explicit_projects_root.strip()).resolve()
     if os.environ.get("MANGOU_HOME"):
         return workspace_root / load_config(workspace_root).workspace_dir
-    return resolve_explicit_projects_root()
+    return resolve_workspace_and_projects_root()[1]
 
 
 class ProjectManager:

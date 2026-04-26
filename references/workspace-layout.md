@@ -38,8 +38,9 @@
 
 ## 运行时根目录
 
-- `MANGOU_WORKSPACE_ROOT` 当前表示 **projects root**，不是 workspace parent。
-- 本地开发、服务器、容器或其它 agent runtime 都应显式配置自己的 projects root。
+- `MANGOU_WORKSPACE_ROOT` 当前表示 **workspace root**。
+- 真实项目目录固定在 `<workspace-root>/projects/<project-id>/`。
+- 本地开发、服务器、容器或其它 agent runtime 都应显式配置自己的 workspace root。
 - 如果环境变量不存在，`project init` 必须传 `--workspace <workspace-root>` 或 `--projects-root <projects-root>`；不要退回到 skill 根目录或任意 cwd。
 - 执行 `project init` 后必须先确认实际落点，再继续写入资产定义或 storyboard。
 

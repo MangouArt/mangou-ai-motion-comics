@@ -22,20 +22,25 @@ PROJECT_DIRS = (
 def resolve_workspace_root(cwd: Path | None = None) -> Path:
     env_root = os.environ.get("MANGOU_HOME")
     if env_root and env_root.strip():
-        return Path(env_root.strip()).resolve()
+        return Path(env_root.strip()).expanduser().resolve()
 
-    explicit_projects_root = os.environ.get("MANGOU_WORKSPACE_ROOT")
-    if explicit_projects_root and explicit_projects_root.strip():
-        return Path(explicit_projects_root.strip()).resolve().parent
+    explicit_workspace_root = os.environ.get("MANGOU_WORKSPACE_ROOT")
+    if explicit_workspace_root and explicit_workspace_root.strip():
+        return Path(explicit_workspace_root.strip()).expanduser().resolve()
 
-    return (cwd or Path.cwd()).resolve()
+    current = (cwd or Path.cwd()).resolve()
+    if _looks_like_workspace_root(current):
+        return current
+    if (current / "project.json").exists():
+        return current.parent.parent
+
+    raise RuntimeError(
+        "MANGOU_WORKSPACE_ROOT is not set and current directory is not a Mangou workspace. "
+        "Set MANGOU_WORKSPACE_ROOT, run from an existing project root, or pass --workspace/--projects-root."
+    )
 
 
 def resolve_projects_root(cwd: Path | None = None) -> Path:
-    explicit_projects_root = os.environ.get("MANGOU_WORKSPACE_ROOT")
-    if explicit_projects_root and explicit_projects_root.strip():
-        return Path(explicit_projects_root.strip()).resolve()
-
     workspace_root = resolve_workspace_root(cwd)
     return workspace_root / load_config(cwd).workspace_dir
 
@@ -44,33 +49,35 @@ def resolve_project_root(project_id: str, cwd: Path | None = None) -> Path:
     return resolve_projects_root(cwd) / project_id
 
 
+def resolve_workspace_and_projects_root(
+    cwd: Path | None = None,
+    workspace: str | Path | object | None = None,
+    projects_root: str | Path | object | None = None,
+) -> tuple[Path, Path]:
+    if projects_root:
+        resolved_projects_root = Path(str(projects_root)).expanduser().resolve()
+        return resolved_projects_root.parent, resolved_projects_root
+    if workspace:
+        resolved_workspace_root = Path(str(workspace)).expanduser().resolve()
+        return resolved_workspace_root, (resolved_workspace_root / load_config(cwd).workspace_dir).resolve()
+
+    resolved_workspace_root = resolve_workspace_root(cwd)
+    return resolved_workspace_root, (resolved_workspace_root / load_config(cwd).workspace_dir).resolve()
+
+
 def resolve_explicit_projects_root(
     cwd: Path | None = None,
     workspace: str | Path | object | None = None,
     projects_root: str | Path | object | None = None,
 ) -> Path:
-    if projects_root:
-        return Path(str(projects_root)).expanduser().resolve()
-    if workspace:
-        return (Path(str(workspace)).expanduser().resolve() / load_config(cwd).workspace_dir).resolve()
+    return resolve_workspace_and_projects_root(cwd, workspace=workspace, projects_root=projects_root)[1]
 
-    explicit_projects_root = os.environ.get("MANGOU_WORKSPACE_ROOT")
-    if explicit_projects_root and explicit_projects_root.strip():
-        return Path(explicit_projects_root.strip()).expanduser().resolve()
 
-    env_root = os.environ.get("MANGOU_HOME")
-    if env_root and env_root.strip():
-        return (Path(env_root.strip()).expanduser().resolve() / load_config(cwd).workspace_dir).resolve()
-
-    current = (cwd or Path.cwd()).resolve()
-    if (current / "project.json").exists():
-        return current.parent
-    if (current / "projects").is_dir() and ((current / "config.json").exists() or (current / "projects.json").exists()):
-        return current / "projects"
-
-    raise RuntimeError(
-        "MANGOU_WORKSPACE_ROOT is not set and current directory is not a Mangou workspace. "
-        "Set MANGOU_WORKSPACE_ROOT, run from an existing project root, or pass --workspace/--projects-root."
+def _looks_like_workspace_root(path: Path) -> bool:
+    return (
+        (path / "projects").is_dir()
+        or (path / "projects.json").exists()
+        or (path / "config.json").exists()
     )
 
 

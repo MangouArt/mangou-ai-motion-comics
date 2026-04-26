@@ -177,7 +177,7 @@ STATUS_HTML = """<!DOCTYPE html>
     <ul>
       <li>项目 API：<a href="/api/projects"><code>/api/projects</code></a></li>
       <li>运行入口：<code>./scripts/runtime/api-start.sh</code></li>
-      <li>数据目录：<code>MANGOU_WORKSPACE_ROOT</code> 指向 projects root</li>
+      <li>数据目录：<code>MANGOU_WORKSPACE_ROOT</code> 指向 workspace root，项目位于其 <code>projects/</code> 子目录</li>
     </ul>
   </div>
 </body>

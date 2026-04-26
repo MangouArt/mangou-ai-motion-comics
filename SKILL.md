@@ -47,9 +47,9 @@ Mangou checklist
 - [ ] Python 主入口现在是 `python3 -m mangou_skill.cli`
 - [ ] 默认测试只使用 `python3 -m unittest discover -s tests_python -p 'test_*.py' -v`
 - [ ] 开发和测试统一从母仓根目录执行 `nix develop`
-- [ ] 真实项目目录只认 `<projects-root>/<project-id>/`
-- [ ] `MANGOU_WORKSPACE_ROOT` 表示 **projects root**，不是 workspace parent
-- [ ] 如果 `MANGOU_WORKSPACE_ROOT` 不存在，先让用户或当前运行环境指定 projects root；不要把 skill 根目录当项目根，也不要在任意 cwd 下隐式创建 `./projects`
+- [ ] workspace root 和 project root 是两个概念：项目目录固定是 `<workspace-root>/projects/<project-id>/`
+- [ ] `MANGOU_WORKSPACE_ROOT` 表示 **workspace root**，例如 `/opt/data/workspace`
+- [ ] 如果 `MANGOU_WORKSPACE_ROOT` 不存在，先让用户或当前运行环境指定 workspace root；不要把 skill 根目录当项目根，也不要在任意 cwd 下隐式创建 `./projects`
 - [ ] `project init` / `project stitch` 优先尊重 `MANGOU_WORKSPACE_ROOT`；初始化新项目时也可显式传 `--workspace` 或 `--projects-root`
 - [ ] 执行 `storyboard generate` / `asset generate` / `storyboard split` 时，优先在包含 `project.json` 的项目根目录作为 cwd，`--path` 使用相对项目根路径
 - [ ] 先读 `references/workspace-layout.md`，再改 YAML
@@ -63,7 +63,7 @@ Mangou checklist
 
 1. 本仓是 skill、references、helper scripts、provider、CLI/runtime 的统一真相源。
 2. 所有 provider 产品层修改都应在本仓完成，不回写旧的 `mangou/skill-src`。
-3. 真实项目目录只保留在当前运行环境声明的 projects root 下，不要放进 skill 根目录。
+3. 真实项目目录只保留在当前 workspace 的 `projects/` 子目录下，不要放进 skill 根目录。
 4. 生成失败时先检查 YAML 参数、provider 错误、`tasks.jsonl` 与对应测试。
 5. 调优成功后，只把通用流程、字段约束或 provider 事实沉淀到本仓；具体审美和项目偏好留在项目文件或运行时记忆中。
 

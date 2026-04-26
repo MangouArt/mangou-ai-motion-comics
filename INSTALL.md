@@ -62,8 +62,8 @@ python3 -m unittest discover -s tests_python -p 'test_*.py' -v
 
 ## 工作区规则
 
-- 真实项目目录只认当前运行环境声明的 projects root，例如 `$MANGOU_WORKSPACE_ROOT/<project-id>/`
+- 真实项目目录只认当前运行环境声明的 workspace root，例如 `$MANGOU_WORKSPACE_ROOT/projects/<project-id>/`
 - 不要把 skill 根目录当成项目目录
 - `tests_python/` 只放 Python `unittest` 测试，不是真实工作区
-- `MANGOU_WORKSPACE_ROOT` 表示 projects root，不是 workspace parent
+- `MANGOU_WORKSPACE_ROOT` 表示 workspace root，不是单个 project root，也不是 projects root
 - `MANGOU_WORKSPACE_ROOT` 未设置时，初始化项目必须显式传 `--workspace` 或 `--projects-root`

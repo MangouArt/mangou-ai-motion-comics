@@ -58,25 +58,23 @@ class MangouCliProjectInitTests(unittest.TestCase):
         self.assertEqual(manager.workspace_root, workspace_root)
         self.assertEqual(manager.projects_root, workspace_root / "projects")
 
-    def test_project_init_respects_mangou_workspace_root(self) -> None:
-        env_projects_root = self.temp_root / "runtime-home" / "projects"
-        os.environ["MANGOU_HOME"] = str(self.temp_root / "runtime-home")
-        os.environ["MANGOU_WORKSPACE_ROOT"] = str(env_projects_root)
+    def test_project_init_respects_mangou_workspace_root_as_workspace(self) -> None:
+        env_workspace_root = self.temp_root / "runtime-home"
+        os.environ["MANGOU_WORKSPACE_ROOT"] = str(env_workspace_root)
 
         exit_code = main(["project", "init", "--name", "env-py-project"])
         self.assertEqual(exit_code, 0)
 
-        self.assertTrue((env_projects_root / "env-py-project").exists())
+        self.assertTrue((env_workspace_root / "projects" / "env-py-project").exists())
         self.assertFalse((self.temp_root / "projects" / "env-py-project").exists())
 
     def test_resolve_project_root_shares_env_aware_resolution(self) -> None:
-        env_projects_root = self.temp_root / "shared-home" / "projects"
-        os.environ["MANGOU_HOME"] = str(self.temp_root / "shared-home")
-        os.environ["MANGOU_WORKSPACE_ROOT"] = str(env_projects_root)
+        env_workspace_root = self.temp_root / "shared-home"
+        os.environ["MANGOU_WORKSPACE_ROOT"] = str(env_workspace_root)
 
         self.assertEqual(
             resolve_project_root("shared-env-project"),
-            env_projects_root / "shared-env-project",
+            env_workspace_root / "projects" / "shared-env-project",
         )
 
     def test_runtime_paths_cli_uses_runtime_api_naming(self) -> None:
