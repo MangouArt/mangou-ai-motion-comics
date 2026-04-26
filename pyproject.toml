@@ -7,6 +7,9 @@ dependencies = [
   "PyYAML>=6.0",
 ]
 
+[tool.setuptools]
+packages = ["mangou_skill"]
+
 [tool.unittest]
 start-directory = "tests_python"
 pattern = "test_*.py"
