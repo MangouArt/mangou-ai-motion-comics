@@ -178,7 +178,7 @@ def download_file(
     *,
     max_attempts: int = 5,
     log_prefix: str = "[mangou]",
-) -> None:
+) -> HttpResponse:
     for attempt in range(1, max_attempts + 1):
         print(f"{log_prefix} Downloading asset: {url} (attempt {attempt}/{max_attempts})")
         response = fetch_with_retry(
@@ -190,13 +190,14 @@ def download_file(
                     "Chrome/124.0.0.0 Safari/537.36"
                 ),
                 "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+                "Referer": "https://api.bltcy.ai/",
             },
             log_prefix=log_prefix,
         )
         if 200 <= response.status < 300:
             target_path.parent.mkdir(parents=True, exist_ok=True)
             target_path.write_bytes(response.body)
-            return
+            return response
 
         should_retry = response.status == 404 and attempt < max_attempts
         if should_retry:
@@ -206,3 +207,5 @@ def download_file(
             continue
 
         raise RuntimeError(f"Failed to download {url}: {response.status} {response.text()[:200]}")
+
+    raise RuntimeError(f"Failed to download {url}: exhausted {max_attempts} attempts")

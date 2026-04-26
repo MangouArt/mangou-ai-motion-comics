@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import mimetypes
 import os
@@ -30,6 +31,16 @@ MIME_BY_EXTENSION = {
     "m4a": "audio/mp4",
     "aac": "audio/aac",
     "ogg": "audio/ogg",
+}
+
+EXTENSION_BY_MIME = {
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/webp": "webp",
+    "image/gif": "gif",
+    "video/mp4": "mp4",
+    "video/quicktime": "mov",
+    "video/webm": "webm",
 }
 
 
@@ -244,6 +255,7 @@ def poll_and_materialize(context: GenerationContext, task_type: str, task_id: st
         raise
 
     primary_output = local_outputs[0] if local_outputs else ""
+    output_details = describe_outputs(context.project_root, local_outputs)
     update_yaml(
         context.yaml_path,
         {
@@ -253,6 +265,7 @@ def poll_and_materialize(context: GenerationContext, task_type: str, task_id: st
                 "backfill_status": "completed",
                 "remote_outputs": outputs,
                 "outputs": local_outputs,
+                "output_details": output_details,
                 "output": primary_output,
                 "task_id": task_id,
                 "updated_at": iso_now(),
@@ -281,7 +294,7 @@ def poll_and_materialize(context: GenerationContext, task_type: str, task_id: st
         task_id=task_id,
         local_outputs=local_outputs,
         remote_outputs=outputs,
-        outputs=describe_outputs(context.project_root, local_outputs),
+        outputs=output_details,
     )
 
 
@@ -409,8 +422,13 @@ def materialize_outputs(project_root: Path, yaml_path: str, task_type: str, task
         sub_dir = "images" if task_type == "image" else "videos"
         filename = f"{Path(yaml_path).stem}-{(task_id or 'task')[:8]}-{index}.{ext}"
         rel_path = Path("assets") / sub_dir / filename
-        download_file(output, project_root / rel_path, log_prefix="[mangou]")
-        localized.append(rel_path.as_posix())
+        absolute_path = project_root / rel_path
+        response = download_file(output, absolute_path, log_prefix="[mangou]")
+        content_type = ""
+        if hasattr(response, "headers"):
+            content_type = response.headers.get("Content-Type", "") or response.headers.get("content-type", "")
+        corrected_rel_path = normalize_materialized_extension(project_root, rel_path, content_type, task_type)
+        localized.append(corrected_rel_path.as_posix())
     return localized
 
 
@@ -419,6 +437,42 @@ def remote_extension(url: str, fallback: str) -> str:
 
     ext = Path(urlparse(url).path).suffix.lstrip(".")
     return ext or fallback
+
+
+def normalize_materialized_extension(project_root: Path, rel_path: Path, content_type: str, task_type: str) -> Path:
+    absolute_path = project_root / rel_path
+    detected_ext, _mime = detect_file_type(absolute_path, content_type, task_type)
+    if not detected_ext or detected_ext == absolute_path.suffix.lower().lstrip("."):
+        return rel_path
+    next_rel_path = rel_path.with_suffix(f".{detected_ext}")
+    next_absolute_path = project_root / next_rel_path
+    next_absolute_path.parent.mkdir(parents=True, exist_ok=True)
+    absolute_path.replace(next_absolute_path)
+    return next_rel_path
+
+
+def detect_file_type(path: Path, content_type: str | None, fallback_type: str | None = None) -> tuple[str | None, str | None]:
+    normalized_content_type = str(content_type or "").split(";", 1)[0].strip().lower()
+    if normalized_content_type in EXTENSION_BY_MIME:
+        return EXTENSION_BY_MIME[normalized_content_type], normalized_content_type
+
+    header = path.read_bytes()[:32] if path.exists() else b""
+    if header.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "png", "image/png"
+    if header.startswith(b"\xff\xd8\xff"):
+        return "jpg", "image/jpeg"
+    if header.startswith(b"RIFF") and header[8:12] == b"WEBP":
+        return "webp", "image/webp"
+    if header.startswith((b"GIF87a", b"GIF89a")):
+        return "gif", "image/gif"
+    if len(header) >= 12 and header[4:8] == b"ftyp":
+        return "mp4", "video/mp4"
+
+    ext = path.suffix.lower().lstrip(".")
+    mime = MIME_BY_EXTENSION.get(ext) or mimetypes.guess_type(path.name)[0]
+    if not mime and fallback_type == "image":
+        mime = f"image/{ext or 'png'}"
+    return (ext or None), mime
 
 
 def assert_outputs_exist(project_root: Path, rel_yaml_path: str, outputs: list[str]) -> None:
@@ -439,8 +493,11 @@ def describe_outputs(project_root: Path, outputs: list[str]) -> list[dict[str, A
             continue
         absolute_output = (project_root / output).resolve()
         if absolute_output.exists():
-            item["bytes"] = absolute_output.stat().st_size
-            item["mime"] = MIME_BY_EXTENSION.get(absolute_output.suffix.lower().lstrip(".")) or mimetypes.guess_type(absolute_output.name)[0]
+            data = absolute_output.read_bytes()
+            _ext, mime = detect_file_type(absolute_output, None)
+            item["bytes"] = len(data)
+            item["mime"] = mime
+            item["sha256"] = hashlib.sha256(data).hexdigest()
         descriptions.append(item)
     return descriptions
 

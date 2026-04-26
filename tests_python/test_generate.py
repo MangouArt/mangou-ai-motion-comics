@@ -7,7 +7,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from mangou_skill.generate import resolve_media_params, resume_aigc, run_aigc, run_aigc_summary
+from mangou_skill.generate import materialize_outputs, resolve_media_params, resume_aigc, run_aigc, run_aigc_summary
+from mangou_skill.http_utils import HttpResponse
 from mangou_skill.yaml_utils import read_yaml_file, write_yaml_file
 
 
@@ -124,6 +125,28 @@ class GenerateTests(unittest.TestCase):
         self.assertEqual(payload["task_id"], "task-json")
         self.assertEqual(payload["outputs"][0]["mime"], "image/png")
         self.assertEqual(payload["outputs"][0]["bytes"], 3)
+        self.assertEqual(len(payload["outputs"][0]["sha256"]), 64)
+        updated = read_yaml_file(yaml_path)
+        self.assertEqual(updated["tasks"]["image"]["latest"]["output_details"][0]["mime"], "image/png")
+
+    def test_materialize_outputs_uses_real_mime_extension(self) -> None:
+        png_bytes = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
+
+        def fake_download(_url: str, path: Path, **_kwargs: object) -> HttpResponse:
+            Path(path).write_bytes(png_bytes)
+            return HttpResponse(status=200, headers={"Content-Type": "image/png"}, body=png_bytes)
+
+        with patch("mangou_skill.generate.download_file", side_effect=fake_download):
+            outputs = materialize_outputs(
+                self.project_root,
+                "storyboards/gpt-image-2-test.yaml",
+                "image",
+                "task-png",
+                ["https://example.com/generated.jpg"],
+            )
+
+        self.assertEqual(outputs, ["assets/images/gpt-image-2-test-task-png-0.png"])
+        self.assertTrue((self.project_root / outputs[0]).exists())
 
     def test_resume_aigc_uses_latest_task_id(self) -> None:
         yaml_path = self.project_root / "storyboards" / "shot-resume.yaml"

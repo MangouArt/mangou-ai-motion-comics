@@ -27,6 +27,22 @@ class ProviderTests(unittest.TestCase):
         self.assertEqual(payload["image"], ["https://example.com/ref.png"])
         self.assertEqual(payload["response_format"], "url")
 
+    def test_bltai_build_gpt_image_2_payload(self) -> None:
+        provider = BLTAIProvider()
+        payload = provider.build_payload(
+            "images",
+            {
+                "prompt": "A cute mango-shaped robot assistant, no text.",
+                "model": "gpt-image-2",
+                "aspect_ratio": "16:9",
+                "image_size": "1K",
+            },
+        )
+        self.assertEqual(payload["model"], "gpt-image-2")
+        self.assertEqual(payload["response_format"], "url")
+        self.assertEqual(payload["aspect_ratio"], "16:9")
+        self.assertEqual(payload["image_size"], "1K")
+
     def test_evolink_video_payload_keeps_media_lists(self) -> None:
         provider = EvolinkProvider()
         payload = provider.build_payload(
@@ -82,6 +98,26 @@ class ProviderTests(unittest.TestCase):
         self.assertEqual(mocked.call_count, 2)
         self.assertEqual(mocked.call_args_list[1].args[0], "https://api.bltcy.ai/v1/images/generations?async=true")
         self.assertIn("https://cdn.bltcy.ai/uploads/ref-1.png", mocked.call_args_list[1].kwargs["data"].decode("utf-8"))
+
+    def test_bltai_poll_treats_not_start_as_pending(self) -> None:
+        provider = BLTAIProvider()
+        responses = [
+            HttpResponse(status=200, headers={}, body=b'{"status":"NOT_START"}'),
+            HttpResponse(status=200, headers={}, body=b'{"status":"SUCCESS","data":[{"url":"https://example.com/out.png"}]}'),
+        ]
+
+        with patch("mangou_skill.providers.fetch_with_retry", side_effect=responses) as mocked:
+            with patch("mangou_skill.providers.sleep") as sleep_mock:
+                result = provider.poll(
+                    base_url="https://api.bltcy.ai",
+                    api_key="test-key",
+                    scope="images",
+                    task_id="task-image",
+                )
+
+        self.assertEqual(mocked.call_count, 2)
+        sleep_mock.assert_called_once()
+        self.assertEqual(provider.extract_outputs("images", result), ["https://example.com/out.png"])
 
     def test_anyint_submit_uploads_data_url_reference(self) -> None:
         provider = AnyIntProvider()

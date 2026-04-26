@@ -219,9 +219,17 @@ class BLTAIProvider:
 
     def extract_outputs(self, scope: str, result: Any) -> list[str]:
         if scope == "images":
-            records = result.get("data", {}).get("data", {}).get("data")
-            if records is None:
-                records = result.get("data", {}).get("data") or result.get("data") or []
+            records: Any = []
+            if isinstance(result, dict):
+                data = result.get("data")
+                if isinstance(data, dict):
+                    nested = data.get("data")
+                    if isinstance(nested, dict):
+                        records = nested.get("data") or nested
+                    else:
+                        records = nested or data
+                else:
+                    records = data or []
             if isinstance(records, dict) and isinstance(records.get("data"), list):
                 records = records["data"]
             if not isinstance(records, list):
