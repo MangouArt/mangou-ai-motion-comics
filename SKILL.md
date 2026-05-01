@@ -59,6 +59,7 @@ Mangou checklist
 - [ ] 使用 Lark/飞书协作时再读 `references/lark-cli-integration.md`；协作工具只负责收发输入输出，不改写项目真相源
 - [ ] 本 skill 保持无状态：不要把具体镜头偏好、审美判断或单个项目经验写回 skill 文档
 - [ ] 线上 Hermes 发现可复用经验时，先读 `references/hermes-evolution.md`；通用 skill 改进通过 evolution PR 固化，运行态记忆和单项目偏好不得写回本仓
+- [ ] 修改 Mangou skill 通用规则或 runtime/provider 代码时，主流程是在本地 `mangou-ai-motion-comics` skill 真相源路径直接修改、验证、只 stage 本次相关文件并 commit，然后运行 `scripts/evolution/propose-skill-change.sh` 自动 push 分支和创建 PR；`/tmp` 干净 clone 只用于隔离验证、复现上游或本地副本缺脚本/状态太脏时的兜底，不作为默认主流程
 - [ ] 若 provider 行为不符合文档，直接在本仓同步修 `references/`、代码与测试
 ```
 
