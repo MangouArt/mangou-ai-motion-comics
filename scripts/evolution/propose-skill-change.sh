@@ -186,8 +186,30 @@ git -c user.name="${HERMES_GIT_AUTHOR_NAME:-Hermes Evolution}" \
   -c user.email="${HERMES_GIT_AUTHOR_EMAIL:-hermes-evolution@users.noreply.github.com}" \
   commit -m "${title}"
 
-git -c "http.https://github.com/.extraheader=AUTHORIZATION: bearer ${GITHUB_TOKEN}" \
+push_was_traced=0
+case "$-" in
+  *x*)
+    push_was_traced=1
+    set +x
+    ;;
+esac
+
+git_push_auth="$(python3 - "${GITHUB_TOKEN}" <<'PY'
+import base64
+import sys
+
+credential = f"x-access-token:{sys.argv[1]}".encode("utf-8")
+print(base64.b64encode(credential).decode("ascii"))
+PY
+)"
+
+git -c "http.https://github.com/.extraheader=AUTHORIZATION: Basic ${git_push_auth}" \
   push "${remote_url}" "HEAD:refs/heads/${branch}"
+unset git_push_auth
+
+if [[ "${push_was_traced}" -eq 1 ]]; then
+  set -x
+fi
 
 api_response="$(mktemp)"
 if ! python3 - "$repo" "$base_branch" "$branch" "$title" "$body_file" "$GITHUB_TOKEN" >"${api_response}" <<'PY'
