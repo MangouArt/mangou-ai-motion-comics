@@ -33,6 +33,12 @@
 # 检查 skill 结构
 ./scripts/doctor/check-layout.sh
 
+# 记录线上 Hermes 反馈
+./scripts/evolution/record-feedback.sh --title "<title>" --summary "<summary>"
+
+# 将当前 skill 改动提交为 GitHub PR
+./scripts/evolution/propose-skill-change.sh --title "<title>" --summary "<summary>" --evidence "<evidence>" --validate
+
 # 运行 Python 测试
 python3 -m unittest discover -s tests_python -p 'test_*.py' -v
 ```
@@ -47,3 +53,4 @@ python3 -m unittest discover -s tests_python -p 'test_*.py' -v
 6. `storyboard generate`、`storyboard resume`、`asset generate` 也走 Python provider 主链；默认开发验证不依赖旧 TS 测试链。
 7. 飞书文档、群消息和附件协作走 `lark-cli`；项目文件、任务日志和生成产物仍以 `<workspace>/projects/<project-id>/` 为真相源。
 8. `MANGOU_WORKSPACE_ROOT` 未设置时，`project init` 必须显式传 `--workspace` 或 `--projects-root`，不要在任意 cwd 下隐式创建 `./projects`。
+9. 线上 Hermes 的通用经验通过 `scripts/evolution/` 开 PR 固化；运行态记忆、单项目偏好和用户审美不要写回 skill。

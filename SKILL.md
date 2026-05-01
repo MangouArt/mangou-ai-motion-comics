@@ -58,6 +58,7 @@ Mangou checklist
 - [ ] 生成后只信任 tasks.jsonl 和 YAML latest 回填
 - [ ] 使用 Lark/飞书协作时再读 `references/lark-cli-integration.md`；协作工具只负责收发输入输出，不改写项目真相源
 - [ ] 本 skill 保持无状态：不要把具体镜头偏好、审美判断或单个项目经验写回 skill 文档
+- [ ] 线上 Hermes 发现可复用经验时，先读 `references/hermes-evolution.md`；通用 skill 改进通过 evolution PR 固化，运行态记忆和单项目偏好不得写回本仓
 - [ ] 若 provider 行为不符合文档，直接在本仓同步修 `references/`、代码与测试
 ```
 
@@ -86,6 +87,7 @@ Mangou checklist
 3. 任务诊断：先读 [references/yaml-state.md](references/yaml-state.md)，再检查 `tasks.jsonl`、YAML latest 和 provider 错误。
 4. 飞书协作：先读 [references/lark-cli-integration.md](references/lark-cli-integration.md)，再使用 lark-cli 进行文档、群消息或附件协作。
 5. 九宫格视频预览：先读 [references/vlog-grid-storyboards.md](references/vlog-grid-storyboards.md)，按 agent 执行流程抽检 reference/first-frame/prompt/YAML 回填，不新增专用产品脚本。
+6. Hermes 自进化：先读 [references/hermes-evolution.md](references/hermes-evolution.md)，再用 `scripts/evolution/` 记录反馈并创建 PR。
 
 ## Reference map
 
@@ -100,6 +102,7 @@ Mangou checklist
 - 一致性规则：[references/consistency.md](references/consistency.md)
 - 任务真相源：[references/yaml-state.md](references/yaml-state.md)
 - Lark CLI 协作：[references/lark-cli-integration.md](references/lark-cli-integration.md)
+- Hermes 自进化：[references/hermes-evolution.md](references/hermes-evolution.md)
 - 脚本 wrapper 排障：[references/script-wrapper-troubleshooting.md](references/script-wrapper-troubleshooting.md)
 - Provider：`references/provider-*.md`
   - KIE 默认：[references/provider-kie.md](references/provider-kie.md)
