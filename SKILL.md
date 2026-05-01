@@ -51,7 +51,9 @@ Mangou checklist
 - [ ] `MANGOU_WORKSPACE_ROOT` 表示 **workspace root**，例如 `/opt/data/workspace`
 - [ ] 如果 `MANGOU_WORKSPACE_ROOT` 不存在，先让用户或当前运行环境指定 workspace root；不要把 skill 根目录当项目根，也不要在任意 cwd 下隐式创建 `./projects`
 - [ ] `project init` / `project stitch` 优先尊重 `MANGOU_WORKSPACE_ROOT`；初始化新项目时也可显式传 `--workspace` 或 `--projects-root`
-- [ ] 执行 `storyboard generate` / `asset generate` / `storyboard split` 时，优先在包含 `project.json` 的项目根目录作为 cwd，`--path` 使用相对项目根路径
+- [ ] 飞书文档是项目 review hub 时，用 `scripts/project/doc-link.sh` 在项目根维护 `feishu_doc.json`；后续先读该文件，不要重复搜索文档
+- [ ] 执行 `storyboard generate` / `asset generate` / `storyboard split` 时，优先在包含 `project.json` 的项目根目录作为 cwd，`--path` 使用相对项目根路径；workflow wrapper 必须保留调用方 cwd，不得 `cd` 到 skill root
+- [ ] 用九宫格母图生成视频预览时，九宫格可作为 reference image，但不是 first_frame；prompt 必须明确最终视频不能出现 grid/contact sheet/panel border。具体抽检、拼接、回报属于 agent 执行流程，不在本 skill 增加专用 CLI。
 - [ ] 先读 `references/workspace-layout.md`，再改 YAML
 - [ ] 生成后只信任 tasks.jsonl 和 YAML latest 回填
 - [ ] 使用 Lark/飞书协作时再读 `references/lark-cli-integration.md`；协作工具只负责收发输入输出，不改写项目真相源
@@ -83,6 +85,7 @@ Mangou checklist
 2. 素材生成：先读 [references/asset-generation.md](references/asset-generation.md)、[references/storyboards.md](references/storyboards.md)，再调用 `scripts/asset/` 或 `scripts/workflow/`。`storyboard generate`、`asset generate`、`storyboard split` 均走 Python 主链。
 3. 任务诊断：先读 [references/yaml-state.md](references/yaml-state.md)，再检查 `tasks.jsonl`、YAML latest 和 provider 错误。
 4. 飞书协作：先读 [references/lark-cli-integration.md](references/lark-cli-integration.md)，再使用 lark-cli 进行文档、群消息或附件协作。
+5. 九宫格视频预览：先读 [references/vlog-grid-storyboards.md](references/vlog-grid-storyboards.md)，按 agent 执行流程抽检 reference/first-frame/prompt/YAML 回填，不新增专用产品脚本。
 
 ## Reference map
 
@@ -92,8 +95,11 @@ Mangou checklist
 - 项目管理：[references/project-management.md](references/project-management.md)
 - 资产定义：[references/asset-generation.md](references/asset-generation.md)
 - 分镜规范：[references/storyboards.md](references/storyboards.md)
+- Vlog 九宫格分镜：[references/vlog-grid-storyboards.md](references/vlog-grid-storyboards.md)
 - Prompt 策略：[references/prompts.md](references/prompts.md)
 - 一致性规则：[references/consistency.md](references/consistency.md)
 - 任务真相源：[references/yaml-state.md](references/yaml-state.md)
 - Lark CLI 协作：[references/lark-cli-integration.md](references/lark-cli-integration.md)
+- 脚本 wrapper 排障：[references/script-wrapper-troubleshooting.md](references/script-wrapper-troubleshooting.md)
 - Provider：`references/provider-*.md`
+  - KIE 默认：[references/provider-kie.md](references/provider-kie.md)

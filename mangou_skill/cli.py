@@ -5,6 +5,7 @@ import json
 
 from .generate import print_json_summary, resume_aigc, run_aigc_summary
 from .project import init_project
+from .project_docs import load_feishu_doc_link, print_json as print_project_doc_json, save_feishu_doc_link
 from .runtime_api import resolve_runtime_api_app_root, resolve_runtime_api_data_root, start_runtime_api
 from .stitch import stitch_project
 from .storyboard import run_split_grid
@@ -56,6 +57,8 @@ Examples:
   python3 -m mangou_skill.cli project init --name my-movie
   python3 -m mangou_skill.cli project init --name my-movie --workspace ./workspace
   python3 -m mangou_skill.cli project stitch --id my-movie
+  python3 -m mangou_skill.cli project doc-link --project-root ./workspace/projects/demo --document-id doxcnXXX --url https://...
+  python3 -m mangou_skill.cli project doc-link --project-root ./workspace/projects/demo --show
   python3 -m mangou_skill.cli storyboard generate --path ./workspace/projects/demo/storyboards/shot-001.yaml --type image
   python3 -m mangou_skill.cli storyboard resume --path ./workspace/projects/demo/storyboards/shot-001.yaml --type video
   python3 -m mangou_skill.cli storyboard split --path ./workspace/projects/demo/storyboards/master.yaml
@@ -89,6 +92,28 @@ def main(argv: list[str] | None = None) -> int:
                 raise ValueError("Project ID is required. Use --id [id] or positional arg.")
             output_name = str(flags.get("outputName") or flags.get("output") or "output.mp4")
             stitch_project(project_id, output_name=output_name)
+            return 0
+
+        if resource == "project" and action == "doc-link":
+            project_root = str(flags.get("projectRoot") or flags.get("root") or ".").strip()
+            if flags.get("show"):
+                print_project_doc_json(load_feishu_doc_link(project_root))
+            else:
+                document_id = str(flags.get("documentId") or flags.get("doc") or "").strip()
+                url = str(flags.get("url") or "").strip()
+                title = str(flags.get("title") or "").strip()
+                role = str(flags.get("role") or "primary").strip()
+                notes = str(flags.get("notes") or "").strip()
+                print_project_doc_json(
+                    save_feishu_doc_link(
+                        project_root,
+                        document_id=document_id,
+                        url=url,
+                        title=title,
+                        role=role,
+                        notes=notes,
+                    )
+                )
             return 0
 
         if resource == "storyboard" and action == "split":

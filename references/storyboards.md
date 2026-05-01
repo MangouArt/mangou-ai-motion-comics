@@ -48,11 +48,13 @@
 1. 真相源是 `tasks.jsonl`，`latest` 只是投影缓存。
 2. `params.images` 必须是相对项目根目录的路径。
 3. 连续镜头优先引用上一镜产物来保持一致性。
-4. 母图和子镜的关系统一用 `meta.parent`、`meta.grid`、`meta.grid_index` 表达。
-5. `storyboard split` 不从 prompt 猜 grid 尺寸，只认 `meta.grid` 或 `--grid`。
-6. `storyboard split` 成功后也会写 `tasks.jsonl`，不要把它当例外。
-7. `stitch` 优先用视频；没视频时会按 `content.duration` 用静图补预览段。
-8. `tasks.image.provider` 和 `tasks.video.provider` 都必须显式写出；skill 仅提供推荐，不做脚本默认。
+4. 做 vlog / 口播 / 生活记录类分镜图时，图片 prompt 需要显式写出第一视角、手机/运动相机、手持晃动、自拍构图、拍摄设备入画、自然生活光、随拍感等 vlog 语法；否则模型容易生成电影感宠物写真，而不是 vlog 分镜。
+5. 若用户要求“4 个分镜图即可”“每个分镜图内部九宫格”“详细描述镜头移动”，按 [vlog-grid-storyboards.md](vlog-grid-storyboards.md) 生成少量 3x3 contact sheet 母图；不要继续输出一长串单张镜头。
+6. 母图和子镜的关系统一用 `meta.parent`、`meta.grid`、`meta.grid_index` 表达。
+7. `storyboard split` 不从 prompt 猜 grid 尺寸，只认 `meta.grid` 或 `--grid`。
+8. `storyboard split` 成功后也会写 `tasks.jsonl`，不要把它当例外。
+9. `stitch` 优先用视频；没视频时会按 `content.duration` 用静图补预览段。
+10. `tasks.image.provider` 和 `tasks.video.provider` 都必须显式写出；skill 仅提供推荐，不做脚本默认。
 
 ## 示例
 

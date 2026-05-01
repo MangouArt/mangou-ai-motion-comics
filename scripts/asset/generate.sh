@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-SKILL_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SKILL_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+export PYTHONPATH="$SKILL_ROOT${PYTHONPATH:+:$PYTHONPATH}"
 
-cd "${SKILL_ROOT}"
-exec python3 -m mangou_skill.cli asset generate "$@"
+python3 -m mangou_skill.cli asset generate "$@"
