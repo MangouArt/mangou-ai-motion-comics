@@ -11,6 +11,8 @@
 
 ## Flow
 
+默认主流程：直接在本地 `mangou-ai-motion-comics` skill 真相源 checkout 修改、验证、只 stage 本次相关文件并 commit，然后运行 `scripts/evolution/propose-skill-change.sh` 自动 push 分支和创建 PR。不要把新建 `/tmp` clone 当成默认提 PR 主路径；`/tmp` 干净 clone 只用于隔离验证、复现上游或本地副本缺脚本/状态太脏时兜底。
+
 ```text
 线上反馈
   -> Hermes 判断是否为通用经验
