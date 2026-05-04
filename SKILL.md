@@ -54,6 +54,7 @@ Mangou checklist
 - [ ] 飞书文档是项目 review hub 时，用 `scripts/project/doc-link.sh` 在项目根维护 `feishu_doc.json`；后续先读该文件，不要重复搜索文档
 - [ ] 执行 `storyboard generate` / `asset generate` / `storyboard split` 时，优先在包含 `project.json` 的项目根目录作为 cwd，`--path` 使用相对项目根路径；workflow wrapper 必须保留调用方 cwd，不得 `cd` 到 skill root
 - [ ] 用九宫格母图生成视频预览时，九宫格可作为 reference image，但不是 first_frame；prompt 必须明确最终视频不能出现 grid/contact sheet/panel border。具体抽检、拼接、回报属于 agent 执行流程，不在本 skill 增加专用 CLI。
+- [ ] 当用户要求整理 Mangou / AI 漫剧创作“通用优先级”、或指出 agent 只修最近批注、忘记前面教训时，先读 [references/creative-priority-review.md](references/creative-priority-review.md)：完整 review 历史对话、联网验证，再按 P0-P10 分层输出草案；规则类内容先供审阅，确认后再固化。
 - [ ] 先读 `references/workspace-layout.md`，再改 YAML
 - [ ] 生成后只信任 tasks.jsonl 和 YAML latest 回填
 - [ ] 使用 Lark/飞书协作时再读 `references/lark-cli-integration.md`；协作工具只负责收发输入输出，不改写项目真相源
@@ -99,6 +100,7 @@ Mangou checklist
 - 资产定义：[references/asset-generation.md](references/asset-generation.md)
 - 分镜规范：[references/storyboards.md](references/storyboards.md)
 - Vlog 九宫格分镜：[references/vlog-grid-storyboards.md](references/vlog-grid-storyboards.md)
+- 通用创作优先级复盘：[references/creative-priority-review.md](references/creative-priority-review.md)（完整历史复盘 + 联网验证 + P0-P10 分层验收，避免只修最近批注）
 - Prompt 策略：[references/prompts.md](references/prompts.md)
 - 一致性规则：[references/consistency.md](references/consistency.md)
 - 任务真相源：[references/yaml-state.md](references/yaml-state.md)
