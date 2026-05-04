@@ -57,7 +57,7 @@ Mangou checklist
 - [ ] 先读 `references/workspace-layout.md`，再改 YAML
 - [ ] 生成后只信任 tasks.jsonl 和 YAML latest 回填
 - [ ] 使用 Lark/飞书协作时再读 `references/lark-cli-integration.md`；协作工具只负责收发输入输出，不改写项目真相源
-- [ ] 本 skill 保持无状态：不要把具体镜头偏好、审美判断或单个项目经验写回 skill 文档
+- [ ] 本 skill 只沉淀 Mangou 通用流程、字段约束、provider 事实与跨项目排障经验；具体镜头偏好、审美判断或单个项目经验不得写入本 skill，应写入项目文件或独立项目 skill。
 - [ ] 线上 Hermes 发现可复用经验时，先读 `references/hermes-evolution.md`；通用 skill 改进通过 evolution PR 固化，运行态记忆和单项目偏好不得写回本仓
 - [ ] 修改 Mangou skill 通用规则或 runtime/provider 代码时，主流程是在本地 `mangou-ai-motion-comics` skill 真相源路径直接修改、验证、只 stage 本次相关文件并 commit，然后运行 `scripts/evolution/propose-skill-change.sh` 自动 push 分支和创建 PR；`/tmp` 干净 clone 只用于隔离验证、复现上游或本地副本缺脚本/状态太脏时的兜底，不作为默认主流程
 - [ ] 若 provider 行为不符合文档，直接在本仓同步修 `references/`、代码与测试
@@ -69,7 +69,7 @@ Mangou checklist
 2. 所有 provider 产品层修改都应在本仓完成，不回写旧的 `mangou/skill-src`。
 3. 真实项目目录只保留在当前 workspace 的 `projects/` 子目录下，不要放进 skill 根目录。
 4. 生成失败时先检查 YAML 参数、provider 错误、`tasks.jsonl` 与对应测试。
-5. 调优成功后，只把通用流程、字段约束或 provider 事实沉淀到本仓；具体审美和项目偏好留在项目文件或运行时记忆中。
+5. 调优成功后，只把通用流程、字段约束或 provider 事实沉淀到本仓；具体审美、镜头偏好和单个项目经验不得写入本 skill，应写入项目文件或独立项目 skill。
 
 ## Skill structure
 
