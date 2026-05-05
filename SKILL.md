@@ -88,7 +88,8 @@ Mangou checklist
 3. 任务诊断：先读 [references/yaml-state.md](references/yaml-state.md)，再检查 `tasks.jsonl`、YAML latest 和 provider 错误。
 4. 飞书协作：先读 [references/lark-cli-integration.md](references/lark-cli-integration.md)，再使用 lark-cli 进行文档、群消息或附件协作。
 5. 九宫格视频预览：先读 [references/vlog-grid-storyboards.md](references/vlog-grid-storyboards.md)，按 agent 执行流程抽检 reference/first-frame/prompt/YAML 回填，不新增专用产品脚本。
-6. Hermes 自进化：先读 [references/hermes-evolution.md](references/hermes-evolution.md)，再用 `scripts/evolution/` 记录反馈并创建 PR。
+6. Hermes 自进化：先读 [references/hermes-evolution.md](references/hermes-evolution.md) 与 [references/evolution-pr-workflow.md](references/evolution-pr-workflow.md)，再用 `scripts/evolution/` 记录反馈并创建 PR。
+7. Mangou NewAPI Agent Gateway 测试：先重新下载远程 `https://mangou-newapi.zeabur.app/skills/mangou-newapi/SKILL.md`，再读 [references/provider-mangou-newapi.md](references/provider-mangou-newapi.md)；所有 agent API 都带 `Authorization: Bearer ${BILLING_TOKEN}`，余额不足先走 `/v1/agent/recharge-qr` demo 充值并验证 `qr_url` SVG、`payment_url` 幂等；KIE Seedance 2.0 视频需 `params.quality: "720p"`。
 
 ## Reference map
 
@@ -107,3 +108,4 @@ Mangou checklist
 - 脚本 wrapper 排障：[references/script-wrapper-troubleshooting.md](references/script-wrapper-troubleshooting.md)
 - Provider：`references/provider-*.md`
   - KIE 默认：[references/provider-kie.md](references/provider-kie.md)
+  - Mangou NewAPI Agent Gateway：[references/provider-mangou-newapi.md](references/provider-mangou-newapi.md) 与 [references/newapi-agent-gateway.md](references/newapi-agent-gateway.md)（远程 skill、`billing_token` auth、balance、demo recharge、BLTAI `gpt-image-2`、KIE `doubao-seedance-2-0-fast-260128`、任务轮询与 quota 记录；可运行 `scripts/newapi-gateway-smoke-test.py`）
